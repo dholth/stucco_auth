@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+    <fieldset>
+      <legend>Sign Up</legend>
+
+      {% if status %}
+        <div class="{{status_type}}">{{status}}</div>
+      {% endif %}
+
+      <form action="{{request.application_url}}/sign-up" method="POST">
+        <div class="field">
+          <label for="username">Username:</label>
+          <input type="text" name="username" value="{{username}}" />
+        </div>
+        <div class="field">
+          <label for="password">Password:</label>
+          <input type="password" name="password" />
+        </div>
+
+        <div class="field">
+          <label for="firstname">First Name:</label>
+          <input name="firstname" type="text" value="{{request.params.get('firstname', '')}}" />
+        </div>
+
+        <div class="field">
+          <label for="firstname">Last Name:</label>
+          <input name="lastname" type="text" value="{{request.params.get('last', '')}}" />
+        </div>
+
+        <input type="submit" value="Sign Up" name="form.submitted" />
+      </form>
+    </fieldset>
+{% endblock %}
