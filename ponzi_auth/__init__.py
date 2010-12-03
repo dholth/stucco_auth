@@ -1,6 +1,7 @@
 from pyramid.configuration import Configurator
 from ponzi_auth.models import get_root
 
+
 def main(global_config, **settings):
     """Return a Pyramid WSGI application."""
     config = Configurator(root_factory=get_root, settings=settings)

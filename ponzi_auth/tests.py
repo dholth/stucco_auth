@@ -34,6 +34,9 @@ class TableTests(unittest.TestCase):
             first_name='Alice', last_name='Liddell',
             email='alice@example.org')
 
+        self.assertEqual(user.is_anonymous(), False)
+        self.assertEqual(str(user), 'user:alice')
+
         session = self.Session()
         session.add(user)        
 
@@ -61,3 +64,30 @@ class TableTests(unittest.TestCase):
 
         user.is_active = False
         assert not user.check_password('borogroves')
+
+    def test_group(self):
+        group = ponzi_auth.tables.Group()
+        group.name = 'testgroup'
+        self.assertEqual(str(group), 'group:testgroup')
+
+    def test_anonymous(self):
+        user = ponzi_auth.tables.AnonymousUser()
+        self.assertTrue(user.is_anonymous())
+        self.assertFalse(user.check_password('foo'))
+
+
+import ponzi_auth
+
+class MainTests(unittest.TestCase):
+
+    def test_main(self):
+        app = ponzi_auth.main({})
+        assert hasattr(app, 'registry')
+
+import ponzi_auth.models
+
+class ModelsTest(unittest.TestCase):
+    
+    def test_get_root(self):
+        root = ponzi_auth.models.get_root(None)
+        assert root is ponzi_auth.models.root
