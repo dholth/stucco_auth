@@ -13,4 +13,3 @@ def main(global_config, **settings):
     config.add_static_view('static', 'ponzi_auth:static')
     config.end()
     return config.make_wsgi_app()
-

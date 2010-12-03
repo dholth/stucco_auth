@@ -5,9 +5,10 @@ Schema inspired by django.contrib.auth
 """
 
 import sqlalchemy
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Unicode, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, Unicode, Integer, Boolean
+from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 
 from cryptacular.core import DelegatingPasswordManager
 from cryptacular.bcrypt import BCRYPTPasswordManager
@@ -47,7 +48,8 @@ class User(Base):
     password = Column(String(80), default='', nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     last_login = Column(DateTime)
-    date_joined = Column(DateTime, default=sqlalchemy.func.current_timestamp())
+    last_password_change = Column(DateTime, default=None)
+    date_joined = Column(DateTime, default=sqlalchemy.func.current_timestamp())    
 
     groups = relationship(Group,
             secondary = users_groups,
