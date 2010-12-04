@@ -54,8 +54,7 @@ class TableTests(unittest.TestCase):
         assert group2 in user.groups
 
     def test_password(self):
-        user = ponzi_auth.tables.User(is_active=True)
-        user.set_password('mimsy')
+        user = ponzi_auth.tables.User(is_active=True, password='mimsy')
         assert user.check_password('mimsy')
         assert not user.check_password('borogroves')
 
