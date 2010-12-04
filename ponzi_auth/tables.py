@@ -39,8 +39,10 @@ class User(Base):
     # When fallbacks are set, DelegatingPasswordManager will recognize
     # and automatically upgrade those password formats to the preferred
     # format when the correct password is provided:
-    passwordmanager = DelegatingPasswordManager(preferred=BCRYPTPasswordManager(),
-            fallbacks=())
+    passwordmanager = DelegatingPasswordManager(
+            preferred=BCRYPTPasswordManager(),
+            fallbacks=()
+            )
 
     user_id = Column(Integer, primary_key=True, nullable=False)
     username = Column(Unicode(30), unique=True, nullable=False)
@@ -96,6 +98,8 @@ class AnonymousUser(User):
         return False
 
 class PasswordReset(Base):
+    """A password reset token. Good for one password reset."""
+
     __tablename__ = 'password_reset'
     
     # for example, uuid.uuid4():

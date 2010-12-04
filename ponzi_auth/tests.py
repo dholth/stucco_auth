@@ -74,6 +74,8 @@ class TableTests(unittest.TestCase):
         self.assertTrue(user.is_anonymous())
         self.assertFalse(user.check_password('foo'))
 
+    def test_passwordreset(self):
+        pass
 
 import ponzi_auth
 
