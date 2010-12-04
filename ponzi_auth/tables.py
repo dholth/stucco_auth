@@ -4,6 +4,8 @@ SQLAlchemy-backed user/group implementation.
 Schema inspired by django.contrib.auth
 """
 
+import datetime
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Unicode, Integer, Boolean
@@ -26,7 +28,7 @@ class Group(Base):
     __tablename__ = 'group'
 
     group_id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(30))
+    name = Column(Unicode(30), unique=True, nullable=False)
 
     def __str__(self):
         return 'group:%s' % self.name
@@ -48,18 +50,26 @@ class User(Base):
     password = Column(String(80), default='', nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     last_login = Column(DateTime)
-    last_password_change = Column(DateTime, default=None)
-    date_joined = Column(DateTime, default=sqlalchemy.func.current_timestamp())    
+    last_password_change = Column(DateTime, default=datetime.date(2001,1,1))
+    date_joined = Column(DateTime, default=sqlalchemy.func.current_timestamp())
 
     groups = relationship(Group,
             secondary = users_groups,
             backref="users")
+
+    def __init__(self, **kwargs):
+        for key,value in kwargs.items():
+            if key == 'password':
+                self.set_password(value)
+            else:
+                setattr(self, key, value)
 
     def is_anonymous(self):
         return False
 
     def set_password(self, raw_password):
         self.password = self.passwordmanager.encode(raw_password)
+        self.last_password_change = sqlalchemy.func.current_timestamp()
 
     def check_password(self, raw_password):
         if not self.is_active: return False
@@ -70,16 +80,33 @@ class User(Base):
         return 'user:%s' % self.username
 
 class AnonymousUser(User):
+    """User when no user is logged in."""
+    def __init__(self, *args, **kwargs):
+        User.__init__(self, *args, **kwargs)
+        self.username = u"anonymous"
+        self.email = u""
+        self.first_name = u"(not logged in)"
+        self.last_name = u""
+        self.is_active = False
 
-    def __init__(self):
-        self.user_id = 0
-        self.username = 'anonymous'
-        
     def is_anonymous(self):
         return True
 
     def check_password(self, raw_password):
         return False
 
+class PasswordReset(Base):
+    __tablename__ = 'password_reset'
+
+    code = Column(Unicode(36), nullable=False, primary_key=True)
+    expires = Column(DateTime, default=None, nullable=True)
+    created = Column(DateTime, default=sqlalchemy.func.current_timestamp(), nullable=False)
+    user_id = Column(Integer, ForeignKey(User.user_id), nullable=False, index=True)
+    user = relationship(User)
+
+    def isexpired(self):
+        return self.expires is None or self.expires < datetime.datetime.utcnow()
+
 def initialize(session):
     Base.metadata.create_all(session.bind)
+
