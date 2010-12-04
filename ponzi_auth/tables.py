@@ -16,8 +16,9 @@ from cryptacular.core import DelegatingPasswordManager
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
 from ponzi_auth import base
-
 Base = declarative_base()
+
+SCHEMA_VERSION = 0
 
 users_groups = sqlalchemy.Table('user_group', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.user_id'), 
@@ -119,5 +120,13 @@ class PasswordReset(Base):
         return self.expires is None or self.expires < datetime.datetime.utcnow()
 
 def initialize(session):
+    import ponzi_evolution
+    # XXX call this every time?
+    ponzi_evolution.initialize(session)
+    from ponzi_evolution import SQLAlchemyEvolutionManager
     Base.metadata.create_all(session.bind)
-
+    manager = SQLAlchemyEvolutionManager(session, 'ponzi_auth.evolve',
+            SCHEMA_VERSION,
+            packagename='ponzi_auth')
+    if manager.get_db_version() is None:
+        manager.set_db_version(SCHEMA_VERSION)

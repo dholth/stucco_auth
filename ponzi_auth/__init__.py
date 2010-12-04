@@ -4,11 +4,12 @@ from sqlalchemy import orm
 from pyramid.configuration import Configurator
 from pyramid_jinja2 import renderer_factory
 
-from ponzi_auth.models import get_root
-
 
 def main(global_config=None, **settings):
     """Return a Pyramid WSGI application."""
+
+    import ponzi_auth.tables
+    from ponzi_auth.models import get_root
 
     if global_config is None:
         global_config = {}
@@ -25,7 +26,13 @@ def main(global_config=None, **settings):
                                          autoflush=False))
 
     config = Configurator(root_factory=get_root, settings=settings)
+
+    session = settings['ponzi_auth.db_session_factory']()
+    ponzi_auth.tables.initialize(session)
+    session.commit()
+
     config.add_renderer('.html', renderer_factory)
     config.scan('ponzi_auth')
     config.add_static_view('static', 'ponzi_auth:static')
     return config.make_wsgi_app()
+
