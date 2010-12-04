@@ -97,7 +97,8 @@ class AnonymousUser(User):
 
 class PasswordReset(Base):
     __tablename__ = 'password_reset'
-
+    
+    # for example, uuid.uuid4():
     code = Column(Unicode(36), nullable=False, primary_key=True)
     expires = Column(DateTime, default=None, nullable=True)
     created = Column(DateTime, default=sqlalchemy.func.current_timestamp(), nullable=False)
