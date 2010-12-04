@@ -30,8 +30,8 @@ def login(request):
         'status_type': status_type,
         'status': status,
         'username': request.params.get('username', u''),
-        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup'),
-        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset'),
+        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup') or False,
+        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset') or False,
         }
 
 

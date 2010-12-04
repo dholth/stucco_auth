@@ -1,24 +1,8 @@
 import unittest
 
-from pyramid.configuration import Configurator
-from pyramid import testing
-
-class ViewTests(unittest.TestCase):
-    def setUp(self):
-        self.config = Configurator()
-        self.config.begin()
-
-    def tearDown(self):
-        self.config.end()
-
-    def test_my_view(self):
-        from ponzi_auth.views import my_view
-        request = testing.DummyRequest()
-        info = my_view(request)
-        self.assertEqual(info['project'], 'ponzi_auth')
-
 import ponzi_auth.tables
 from ponzi_auth.tables import User, Group
+
 import sqlalchemy
 import sqlalchemy.orm
 
@@ -74,19 +58,114 @@ class TableTests(unittest.TestCase):
         self.assertTrue(user.is_anonymous())
         self.assertFalse(user.check_password('foo'))
 
+    def test_password_reset(self):
+        pr = ponzi_auth.tables.PasswordReset()
+        self.assertTrue(pr.isexpired())
+
 
 import ponzi_auth
 
 class MainTests(unittest.TestCase):
 
     def test_main(self):
-        app = ponzi_auth.main({})
-        assert hasattr(app, 'registry')
+        assert hasattr(ponzi_auth.main(), 'registry')
 
 import ponzi_auth.models
 
-class ModelsTest(unittest.TestCase):
+class ModelsTests(unittest.TestCase):
     
     def test_get_root(self):
         root = ponzi_auth.models.get_root(None)
         assert root is ponzi_auth.models.root
+
+import ponzi_auth.views 
+from pyramid.testing import DummyRequest
+from sqlalchemy.orm.exc import NoResultFound
+from pyramid.exceptions import NotFound
+
+class MockDBSession(object):
+
+    def __init__(self):
+        self.data = []
+
+    def query(self, s):
+        return self
+
+    def filter_by(self, **kwargs):
+        return self
+
+    def one(self):
+        if len(self.data) == 0:
+            raise NoResultFound()
+        return self.data[0]
+
+    def add(self, obj):
+        self.data.append(obj)
+
+    def count(self):
+        return len(self.data)
+
+    def commit(self):
+        pass
+
+class ViewsTests(unittest.TestCase):
+
+    def setUp(self):
+        self.request = DummyRequest()
+        self.settings = self.request.registry.settings = {}
+        self.db_session = MockDBSession()
+        self.db_session.data = []
+        self.settings['ponzi_auth.db_session_factory'] = \
+            lambda db_session=self.db_session: db_session
+
+    def tearDown(self):
+        pass
+
+    def test_get_dbsession(self):
+        self.assertTrue(isinstance(ponzi_auth.views.get_dbsession(self.request),
+                                   MockDBSession))
+
+    def test_login(self):
+        d = ponzi_auth.views.login(self.request)
+        self.assertEqual(d['status_type'], u'')
+
+    def test_post_login(self):
+        self.request.method = 'POST'
+        self.request.params['form.submitted'] = True
+        self.request.params['username'] = 'user1'
+        self.request.params['password'] = 'user1'
+
+        d = ponzi_auth.views.login(self.request)
+        self.assertEqual(d['status_type'], u'error')
+
+        class User(ponzi_auth.tables.AnonymousUser):
+            def check_password(self, p):
+                return True
+
+        self.db_session.add(User())
+        d = ponzi_auth.views.login(self.request)
+        self.assertEqual(d['status_type'], u'info')
+
+    def test_signup(self):
+        # by default signup is disabled
+        self.assertRaises(NotFound, lambda: ponzi_auth.views.signup(self.request))
+
+        self.settings['ponzi_auth.allow_signup'] = True
+        d = ponzi_auth.views.signup(self.request)
+        self.assertEqual(d['status_type'], u'')
+
+    def test_post_signup(self):
+        self.settings['ponzi_auth.allow_signup'] = True
+        self.request.method = 'POST'
+        self.request.params['form.submitted'] = True
+        self.request.params['username'] = 'user1'
+        self.request.params['password'] = 'user1'
+        self.request.params['firstname'] = 'foo'
+
+        # should successfully sign up and add a new user
+        d = ponzi_auth.views.signup(self.request)
+        self.assertEqual(d['status_type'], u'info')
+
+        # will fail because of creating with same username
+        d = ponzi_auth.views.signup(self.request)
+        self.assertEqual(d['status_type'], u'error')
