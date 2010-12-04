@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}Log-In{% endblock %}
+
+{% block content %}
+<h1>Log-In</h1>
+<fieldset id="login-fields" class="form">
+  <legend>Log-In</legend>
+
+  {% if status %}
+    <div class="{{status_type}}">{{status}}</div>
+  {% endif %}
+
+  <form action="{{request.application_url}}/login" method="POST">
+    <div class="fields">
+      <div class="field">
+        <label for="username">Username:</label>
+        <input type="text" name="username" value="{{username}}" />
+      </div>
+      <div class="field">
+        <label for="password">Password:</label>
+        <input type="password" name="password" />
+      </div>
+      <div class="clear"><!-- --></div>
+    </div>
+    <input type="submit" value="Log-In" name="form.submitted" />
+    <div class="clear"><!-- --></div>
+  </form>
+{% if allow_signup %}<div class="login-action signup">Don't have a user account?  <a href="{{request.application_url}}/sign-up">Sign up here</a></div>{% endif %}
+{% if allow_password_reset %}<div class="login-action password-reset">Can't remember your password? <a href="{{request.application_url}}/password-reset">Click here to reset.</a></div>{% endif %}
+</fieldset>
+</fieldset>
+{% endblock %}

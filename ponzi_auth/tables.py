@@ -15,6 +15,8 @@ from sqlalchemy.orm import relationship
 from cryptacular.core import DelegatingPasswordManager
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
+from ponzi_auth import base
+
 Base = declarative_base()
 
 users_groups = sqlalchemy.Table('user_group', Base.metadata,
@@ -26,12 +28,14 @@ users_groups = sqlalchemy.Table('user_group', Base.metadata,
 
 class Group(Base):
     __tablename__ = 'group'
-
     group_id = Column(Integer, primary_key=True, nullable=False)
     name = Column(Unicode(30), unique=True, nullable=False)
 
     def __str__(self):
         return 'group:%s' % self.name
+
+base.AbstractGroup.register(Group)
+
 
 class User(Base):
     __tablename__ = 'user'
@@ -81,7 +85,9 @@ class User(Base):
     def __str__(self):
         return 'user:%s' % self.username
 
-class AnonymousUser(User):
+base.AbstractUser.register(User)
+
+class AnonymousUser(base.AbstractUser):
     """User when no user is logged in."""
     def __init__(self, *args, **kwargs):
         User.__init__(self, *args, **kwargs)
