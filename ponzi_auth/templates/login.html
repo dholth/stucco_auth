@@ -8,26 +8,28 @@
   <legend>Log-In</legend>
 
   {% if status %}
-    <div class="{{status_type}}">{{status}}</div>
+    <div class="status {{status_type}}">{{status}}</div>
   {% endif %}
 
-  <form action="{{request.application_url}}/login" method="POST">
+  <form action="{{request.application_url}}/login"
+        method="POST">
     <div class="fields">
       <div class="field">
         <label for="username">Username:</label>
-        <input type="text" name="username" value="{{username}}" />
+        <input type="text" name="username" value="{{username}}" {% if not form_enabled %}disabled{% endif %}/>
       </div>
       <div class="field">
         <label for="password">Password:</label>
-        <input type="password" name="password" />
+        <input type="password" name="password" {% if not form_enabled %}disabled{% endif %}/>
       </div>
       <div class="clear"><!-- --></div>
     </div>
-    <input type="submit" value="Log-In" name="form.submitted" />
+    <input type="submit" value="Log-In" name="form.submitted" {% if not form_enabled %}disabled{% endif %}/>
     <div class="clear"><!-- --></div>
   </form>
 {% if allow_signup %}<div class="login-action signup">Don't have a user account?  <a href="{{request.application_url}}/sign-up">Sign up here</a></div>{% endif %}
 {% if allow_password_reset %}<div class="login-action password-reset">Can't remember your password? <a href="{{request.application_url}}/password-reset">Click here to reset.</a></div>{% endif %}
+{% if logged_in %}<div class="login-action logout"><a href="{{request.application_url}}/logout?came_from={{request.url}}">Click here to log out.</a></div>{% endif %}
 </fieldset>
 </fieldset>
 {% endblock %}

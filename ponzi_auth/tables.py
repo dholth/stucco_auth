@@ -93,6 +93,7 @@ class AnonymousUser(base.AbstractUser):
     last_name = u''
     is_active = False
     user_id = -1
+    groups = ()
 
     def is_anonymous(self):
         return True
@@ -115,4 +116,3 @@ class PasswordReset(Base):
 
 def initialize(session):
     Base.metadata.create_all(session.bind)
-

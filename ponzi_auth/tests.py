@@ -82,6 +82,7 @@ import ponzi_auth.views
 from pyramid.testing import DummyRequest
 from sqlalchemy.orm.exc import NoResultFound
 from pyramid.exceptions import NotFound
+from pyramid.httpexceptions import HTTPFound
 
 class MockDBSession(object):
 
@@ -128,6 +129,8 @@ class ViewsTests(unittest.TestCase):
     def test_login(self):
         d = ponzi_auth.views.login(self.request)
         self.assertEqual(d['status_type'], u'')
+        d = ponzi_auth.views.login(self.request, username='foo')
+        self.assertEqual(d['status_type'], u'info')
 
     def test_post_login(self):
         self.request.method = 'POST'
@@ -144,7 +147,7 @@ class ViewsTests(unittest.TestCase):
 
         self.db_session.add(User())
         d = ponzi_auth.views.login(self.request)
-        self.assertEqual(d['status_type'], u'info')
+        self.assertTrue(isinstance(d, HTTPFound))
 
     def test_signup(self):
         # by default signup is disabled
@@ -169,3 +172,21 @@ class ViewsTests(unittest.TestCase):
         # will fail because of creating with same username
         d = ponzi_auth.views.signup(self.request)
         self.assertEqual(d['status_type'], u'error')
+
+    def test_logout(self):
+        d = ponzi_auth.views.logout(self.request)
+        self.assertTrue(isinstance(d, HTTPFound))
+
+    def test_find_user(self):
+        d = ponzi_auth.views.find_user(self.request)
+        self.assertTrue(d is None)
+        self.assertRaises(NoResultFound,
+                          lambda: ponzi_auth.views.find_user(self.request, username='foo'))
+
+    def test_find_groups(self):
+        user = ponzi_auth.tables.AnonymousUser()
+        find_groups = ponzi_auth.views.find_groups
+        self.assertEqual([], [x for x in find_groups(None, self.request)])
+        self.assertEqual([], [x for x in find_groups(user, self.request)])
+        self.assertRaises(NoResultFound,
+                          lambda: self.assertEqual([], [x for x in find_groups('foo', self.request)]))

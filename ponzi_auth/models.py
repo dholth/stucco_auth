@@ -1,7 +1,7 @@
-class MyModel(object):
-    pass
+class Root(object):
+    __name__ = ''
 
-root = MyModel()
+root = Root()
 
 def get_root(request):
     return root

@@ -1,10 +1,13 @@
 import sqlalchemy
 from sqlalchemy import orm
 
+from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.configuration import Configurator
 from pyramid_jinja2 import renderer_factory
 
 from ponzi_auth.models import get_root
+from ponzi_auth.views import find_groups
 
 
 def main(global_config=None, **settings):
@@ -24,7 +27,13 @@ def main(global_config=None, **settings):
                                          autocommit=False,
                                          autoflush=False))
 
-    config = Configurator(root_factory=get_root, settings=settings)
+    authentication_policy = AuthTktAuthenticationPolicy('oursecret',
+                                                        callback=find_groups)
+    authorization_policy = ACLAuthorizationPolicy()
+    config = Configurator(root_factory=get_root,
+                          settings=settings,
+                          authentication_policy=authentication_policy,
+                          authorization_policy=authorization_policy)
     config.add_renderer('.html', renderer_factory)
     config.scan('ponzi_auth')
     config.add_static_view('static', 'ponzi_auth:static')
