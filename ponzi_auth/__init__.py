@@ -15,6 +15,7 @@ def main(global_config=None, **settings):
     settings = dict(settings)
     settings.setdefault('jinja2.directories', 'ponzi_auth:templates')
     settings.setdefault('ponzi_auth.allow_signup', False)
+    settings.setdefault('ponzi_auth.allow_password_reset', False) # not implemented yet
     settings.setdefault('ponzi_auth.db_connect_string', 'sqlite:///ponzi_auth.db')
     settings.setdefault('ponzi_auth.db_engine',
                         sqlalchemy.create_engine(settings['ponzi_auth.db_connect_string']))

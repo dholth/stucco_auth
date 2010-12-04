@@ -30,7 +30,8 @@ def login(request):
         'status_type': status_type,
         'status': status,
         'username': request.params.get('username', u''),
-        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup')
+        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup'),
+        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset'),
         }
 
 
@@ -44,9 +45,9 @@ def signup(request):
     status_type = u''
     if request.method == 'POST' and 'form.submitted' in request.params:
         dbsession = get_dbsession(request)
-        user = dbsession.query(tables.User).get(request.params['username'])
+        user_count = dbsession.query(tables.User).filter_by(username=request.params['username']).count()
         status_type = u'error'
-        if user is not None:
+        if user_count > 0:
             status = u'Username already taken'
         else:
             status = u'Error creating account'
