@@ -6,7 +6,11 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 def get_dbsession(request):
-    return request.registry.settings['ponzi_auth.db_session_factory']()
+    try:
+        return request.db
+    except:
+        request.db = request.registry.settings['ponzi_auth.db_session_factory']()
+        return request.db
 
 @view_config(name='login',
              renderer='login.html')
