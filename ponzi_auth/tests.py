@@ -11,12 +11,6 @@ class ViewTests(unittest.TestCase):
     def tearDown(self):
         self.config.end()
 
-    def test_my_view(self):
-        from ponzi_auth.views import my_view
-        request = testing.DummyRequest()
-        info = my_view(request)
-        self.assertEqual(info['project'], 'ponzi_auth')
-
 import ponzi_auth.tables
 from ponzi_auth.tables import User, Group
 import sqlalchemy
@@ -85,10 +79,32 @@ class MainTests(unittest.TestCase):
         app = ponzi_auth.main({})
         assert hasattr(app, 'registry')
 
-import ponzi_auth.models
+from ponzi_auth.models import Locatable, KeyTraverser, get_root
 
 class ModelsTest(unittest.TestCase):
     
     def test_get_root(self):
-        root = ponzi_auth.models.get_root(None)
-        assert root is ponzi_auth.models.root
+        root = get_root(None)
+        assert root is not None
+
+    def test_mixins(self):
+        class FooBar(KeyTraverser, Locatable):
+            def __init__(self, name=None, parent=None, session=None):
+                KeyTraverser.__init__(self, session=session)
+                Locatable.__init__(self, name=name, parent=parent)
+        
+        class BarFoo(Locatable, KeyTraverser):
+            def __init__(self, name=None, parent=None, session=None):
+                Locatable.__init__(self, name=name, parent=parent)
+                KeyTraverser.__init__(self, session=session)
+
+        fb = FooBar(name='foobar', parent='parent', session='a session')
+        assert fb.__name__ == 'foobar', fb.__name__
+        assert fb.__parent__ == 'parent'
+        assert fb.session == 'a session'
+
+        bf = BarFoo(name='barfoo', parent='parent', session='a session')
+        assert bf.__name__ == 'barfoo'
+        assert bf.__parent__ == 'parent'
+        assert bf.session == 'a session'
+

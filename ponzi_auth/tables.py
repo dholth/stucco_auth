@@ -87,7 +87,7 @@ class User(Base):
 
 base.AbstractUser.register(User)
 
-class AnonymousUser(base.AbstractUser):
+class AnonymousUser(User):
     """User when no user is logged in."""
     def __init__(self, *args, **kwargs):
         User.__init__(self, *args, **kwargs)
