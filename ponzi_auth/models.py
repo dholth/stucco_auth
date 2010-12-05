@@ -1,6 +1,7 @@
 """
 Traversal models.
 
+
 In this package, 'session' or 'self.session' is always a SQLAlchemy
 session. The Beaker session, if used, is always called
 'request.session'. Apologies.

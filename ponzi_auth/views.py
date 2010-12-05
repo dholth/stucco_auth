@@ -1,9 +1,12 @@
 import datetime
 from pyramid.view import view_config
+from pyramid import security
+from pyramid.url import model_url
 from pyramid.exceptions import NotFound
-from ponzi_auth import tables
+from pyramid.httpexceptions import HTTPFound
 from sqlalchemy.orm.exc import NoResultFound
 
+from ponzi_auth import tables
 
 def get_dbsession(request):
     try:
@@ -14,7 +17,15 @@ def get_dbsession(request):
 
 @view_config(name='login',
              renderer='login.html')
-def login(request):
+def login(request, username=None):
+    logged_in = bool(username or security.authenticated_userid(request))
+
+    if logged_in:
+        return {'logged_in': True,
+                'form_enabled': False,
+                'status': u'Already logged in',
+                'status_type': u'info'}
+
     status = u''
     status_type = u''
     if request.method == 'POST' and 'form.submitted' in request.params:
@@ -22,20 +33,25 @@ def login(request):
         status = u'Invalid username and/or password'
         dbsession = get_dbsession(request)
         try:
-            user = dbsession.query(tables.User).filter_by(username=request.params['username']).one()
+            username = request.params['username']
+            user = dbsession.query(tables.User).filter_by(username=username).one()
             if user.check_password(request.params['password']):
-                status = u'Successfully logged in'
-                status_type = u'info'
+                came_from = request.params.get('came_from',
+                                               model_url(request.root, request))
+                return HTTPFound(location=came_from,
+                                 headers=security.remember(request, username))
         except NoResultFound:
             # just use above error msg
             pass
 
     return {
+        'form_enabled': True,
         'status_type': status_type,
         'status': status,
+        'logged_in': False,
         'username': request.params.get('username', u''),
-        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup'),
-        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset'),
+        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup') or False,
+        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset') or False,
         }
 
 
@@ -74,3 +90,25 @@ def signup(request):
         'status': status,
         'username': request.params.get('username', u'')
         }
+
+@view_config(name='logout')
+def logout(request):
+    came_from = request.params.get('came_from',
+                                   model_url(request.root, request))
+    return HTTPFound(location=came_from,
+                     headers=security.forget(request))
+
+def find_user(request, username=None):
+    username = username or security.authenticated_userid(request)
+    if not username:
+        return None
+    db_session = get_dbsession(request)
+    return db_session.query(tables.User).filter_by(username=username).one()
+
+def find_groups(user, request):
+    if isinstance(user, basestring):
+        user = find_user(request, user)
+    if user is None:
+        return []
+
+    return user.groups

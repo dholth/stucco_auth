@@ -17,5 +17,9 @@ class AbstractUser(object):
     @abc.abstractmethod
     def check_password(self, raw_password): return
 
+    @abc.abstractproperty
+    def groups(self): return
+
+
 class AbstractGroup(object):
     __metaclass__ = abc.ABCMeta

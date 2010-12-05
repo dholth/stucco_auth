@@ -50,7 +50,7 @@ class User(Base):
             )
 
     user_id = Column(Integer, primary_key=True, nullable=False)
-    username = Column(Unicode(30), unique=True, nullable=False)
+    username = Column(Unicode(30), unique=True, nullable=False, index=True)
     first_name = Column(Unicode(30))
     last_name = Column(Unicode(30))
     email = Column(Unicode(30))
@@ -89,14 +89,14 @@ class User(Base):
 base.AbstractUser.register(User)
 
 class AnonymousUser(User):
-    """User when no user is logged in."""
-    def __init__(self, *args, **kwargs):
-        User.__init__(self, *args, **kwargs)
-        self.username = u"anonymous"
-        self.email = u""
-        self.first_name = u"(not logged in)"
-        self.last_name = u""
-        self.is_active = False
+
+    username = u'anonymous'
+    email = u""
+    first_name = u'(not logged in)'
+    last_name = u''
+    is_active = False
+    user_id = -1
+    groups = ()
 
     def is_anonymous(self):
         return True
