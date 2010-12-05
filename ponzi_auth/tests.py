@@ -1,7 +1,7 @@
 import unittest
 
 import ponzi_auth.tables
-from ponzi_auth.tables import User, Group
+from ponzi_auth.tables import Group
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -68,15 +68,16 @@ import ponzi_auth
 class MainTests(unittest.TestCase):
 
     def test_main(self):
-        assert hasattr(ponzi_auth.main(), 'registry')
+        app = ponzi_auth.main({})
+        assert hasattr(app, 'registry')
 
-import ponzi_auth.models
+from ponzi_auth.models import get_root
 
 class ModelsTests(unittest.TestCase):
     
     def test_get_root(self):
-        root = ponzi_auth.models.get_root(None)
-        assert root is ponzi_auth.models.root
+        root = get_root(None)
+        assert root is not None
 
 import ponzi_auth.views 
 from pyramid.testing import DummyRequest
