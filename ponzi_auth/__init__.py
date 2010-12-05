@@ -1,12 +1,14 @@
 import sqlalchemy
 from sqlalchemy import orm
 
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.events import NewRequest
-from pyramid.configuration import Configurator
-import pyramid_jinja2
 from ponzi_auth import views
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.configuration import Configurator
+from pyramid.events import NewRequest
+
+import pyramid_formish
+import pyramid_jinja2
 
 from ponzi_auth.views import find_groups
 

@@ -71,7 +71,7 @@ class MainTests(unittest.TestCase):
         app = ponzi_auth.main({})
         assert hasattr(app, 'registry')
 
-from ponzi_auth.models import Locatable, KeyTraverser, get_root
+from ponzi_auth.models import get_root
 
 class ModelsTests(unittest.TestCase):
     

@@ -7,8 +7,6 @@ from pyramid.httpexceptions import HTTPFound
 from ponzi_auth import tables
 from sqlalchemy.orm.exc import NoResultFound
 
-from ponzi_auth import tables
-
 import logging
 log = logging.getLogger(__name__)
 
