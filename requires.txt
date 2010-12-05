@@ -1,0 +1,5 @@
+# ponzi_auth plus some dependencies not available in pypi.
+# Install with `pip install -r requires.txt` preferably in a virtualenv.
+-e hg+http://bitbucket.org/dholth/ponzi_auth#egg=ponzi_auth
+-e hg+http://bitbucket.org/dholth/pyramid_uniform#egg=pyramid_uniform
+-e git+https://github.com/Pylons/pyramid_formish.git#egg=pyramid_formish
