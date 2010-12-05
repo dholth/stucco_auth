@@ -7,12 +7,12 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-'cryptacular',
-'ponzi_evolution',
-'pyramid',
-'pyramid_beaker',
-'pyramid_formish',
-'WebError',
+    'cryptacular',
+    'ponzi_evolution',
+    'pyramid',
+    'pyramid_beaker',
+    'pyramid_formish',
+    'pyramid_jinja2',
 ]
 
 setup(name='ponzi_auth',
