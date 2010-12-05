@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block css %}
+{{ super() }}
+<link type="text/css" href="{{ request.script_name }}/static/uni-form.css" rel="stylesheet" />
+{% endblock %}
+{% block js %}
+{{ super() }}
+<script type="text/javascript" src="{{ request.script_name }}/static/uni-form.jquery.js"></script>
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+{{ request.form() | safe }}
+{% endblock %}

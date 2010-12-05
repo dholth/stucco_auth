@@ -1,8 +1,12 @@
 syntax:glob
-*~
 .*
-*.pyc
-*.o
-*.so
-*.log
+*~
+*.db
 *.egg-info/*
+*.log
+*.o
+*.orig
+*.patch
+*.pyc
+*.rej
+*.so

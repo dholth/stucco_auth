@@ -6,6 +6,8 @@ session. The Beaker session, if used, is always called
 'request.session'. Apologies.
 """
 
+import copy
+
 from pyramid.security import Allow, Everyone, DENY_ALL
 
 from ponzi_auth.tables import User, PasswordReset
@@ -37,7 +39,7 @@ class KeyTraverser(object):
         item.__parent__ = self
         item.__name__ = unicode(key)
         if hasattr(self, '__child_acl__'):
-            item.__acl__ = self.__child_acl__.copy()
+            item.__acl__ = copy.copy(self.__child_acl__)
         return item
 
 class Users(Locatable, KeyTraverser):
@@ -45,6 +47,10 @@ class Users(Locatable, KeyTraverser):
     __acl__ = [
             (Allow, 'group:admin', 'view'),
             (Allow, 'group:admin', 'post'),
+            # In my application, I only allow admins to view the list
+            # of all users, but individuals can still get to their own
+            # User page. Let all logged in users view:
+            (Allow, 'system.Authenticated', 'view'),
             DENY_ALL 
             ]
     __child_acl__ = [

@@ -1,0 +1,6 @@
+Dear {{ data.first_name }} {{ data.last_name }},
+
+Your new account "{{ data.username }}" is almost ready. Visit {{
+request.application_url }}/passwordreset/{{ reset.code }} to set an
+initial password.
+

@@ -1,7 +1,7 @@
 import unittest
 
 from pyramid.configuration import Configurator
-from pyramid import testing
+# from pyramid import testing
 
 class ViewTests(unittest.TestCase):
     def setUp(self):
@@ -12,7 +12,7 @@ class ViewTests(unittest.TestCase):
         self.config.end()
 
 import ponzi_auth.tables
-from ponzi_auth.tables import User, Group
+from ponzi_auth.tables import Group
 import sqlalchemy
 import sqlalchemy.orm
 

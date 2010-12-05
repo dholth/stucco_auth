@@ -1,11 +1,15 @@
 import datetime
 from pyramid.view import view_config
 from pyramid.exceptions import NotFound
+from pyramid.security import remember
 from ponzi_auth import tables
 from sqlalchemy.orm.exc import NoResultFound
 
+import logging
+log = logging.getLogger(__name__)
 
 def get_dbsession(request):
+    # XXX this is lame
     try:
         return request.db
     except:
@@ -26,6 +30,7 @@ def login(request):
             if user.check_password(request.params['password']):
                 status = u'Successfully logged in'
                 status_type = u'info'
+                request.response_headerlist = remember(request, user.user_id)
         except NoResultFound:
             # just use above error msg
             pass
@@ -74,3 +79,13 @@ def signup(request):
         'status': status,
         'username': request.params.get('username', u'')
         }
+
+
+def view_plural(request):
+    """Generic view for a simple collection."""
+    return {'items':list(request.context)}
+
+def view_model(request):
+    """Do-nothing view. Template will reference request.context"""
+    return {}
+
