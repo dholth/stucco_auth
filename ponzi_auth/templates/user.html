@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}User{% endblock %}
+{% block content %}
+{% set item = request.context %}
+<h2>{{ item.username }} <a href="{{ request.path_url.rstrip("/") }}/edit">(edit)</a></h2>
+<b>id:</b> {{item.user_id}}<br />
+<b>Name:</b> {{item.username}}<br />
+<b>E-mail:</b> {{item.email}}<br />
+<b>Groups:</b> {{item.groups}}<br />
+<b>Last login:</b> {{item.last_login}} UTC<br />
+{% endblock %}

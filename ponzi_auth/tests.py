@@ -1,7 +1,7 @@
 import unittest
 
 import ponzi_auth.tables
-from ponzi_auth.tables import User, Group
+from ponzi_auth.tables import Group
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -68,7 +68,8 @@ import ponzi_auth
 class MainTests(unittest.TestCase):
 
     def test_main(self):
-        assert hasattr(ponzi_auth.main(), 'registry')
+        app = ponzi_auth.main({})
+        assert hasattr(app, 'registry')
 
 from ponzi_auth.models import Locatable, KeyTraverser, get_root
 

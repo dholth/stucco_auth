@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+<h2>Users <a href="{{ request.path_url.rstrip("/") }}/new">(create)</a></h2>
+<div>
+{% for item in items %}
+<a href="{{ request.path_url }}/{{ item.user_id }}">{{ item.username }}</a>
+{% endfor %}
+</div>
+</div>
+</div>
+{% endblock %}

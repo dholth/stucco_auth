@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<h1>Ponzi Auth</h1>
+<p>This is the example application for ponzi_auth.</p>
+<ul>
+<li><a href="{{request.path_url.rstrip('/')}}/login">Login</a></li>
+<li><a href="{{request.path_url.rstrip('/')}}/users">Users</a></li>
+<li><a href="{{request.path_url.rstrip('/')}}/passwordreset">Password Reset</a></li>
+</ul>
+{% endblock %}

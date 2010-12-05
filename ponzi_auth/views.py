@@ -4,11 +4,16 @@ from pyramid import security
 from pyramid.url import model_url
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
+from ponzi_auth import tables
 from sqlalchemy.orm.exc import NoResultFound
 
 from ponzi_auth import tables
 
+import logging
+log = logging.getLogger(__name__)
+
 def get_dbsession(request):
+    # XXX this is lame
     try:
         return request.db
     except:
@@ -90,6 +95,15 @@ def signup(request):
         'status': status,
         'username': request.params.get('username', u'')
         }
+
+
+def view_plural(request):
+    """Generic view for a simple collection."""
+    return {'items':list(request.context)}
+
+def view_model(request):
+    """Do-nothing view. Template will reference request.context"""
+    return {}
 
 @view_config(name='logout')
 def logout(request):

@@ -19,6 +19,8 @@ from ponzi_auth import base
 Base = declarative_base()
 
 SCHEMA_VERSION = 0
+SCHEMA_PACKAGENAME = 'ponzi_auth'
+SCHEMA_EVOLVESCRIPTS = 'ponzi_auth.evolve'
 
 users_groups = sqlalchemy.Table('user_group', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.user_id'), 
@@ -119,14 +121,41 @@ class PasswordReset(Base):
     def isexpired(self):
         return self.expires is None or self.expires < datetime.datetime.utcnow()
 
-def initialize(session):
-    import ponzi_evolution
-    # XXX call this every time?
-    ponzi_evolution.initialize(session)
+
+def _get_evolution_manager(session):
+    """Return an object capable of running numbered evolveN.py scripts."""
     from ponzi_evolution import SQLAlchemyEvolutionManager
-    Base.metadata.create_all(session.bind)
-    manager = SQLAlchemyEvolutionManager(session, 'ponzi_auth.evolve',
+    manager = SQLAlchemyEvolutionManager(session,
+            SCHEMA_EVOLVESCRIPTS,
             SCHEMA_VERSION,
-            packagename='ponzi_auth')
+            packagename=SCHEMA_PACKAGENAME)
+    return manager
+
+def initialize(session):
+    if session.bind.has_table('user'):
+        return
+
+    import ponzi_evolution
+    ponzi_evolution.initialize(session)
+
+    Base.metadata.create_all(session.bind)
+    manager = _get_evolution_manager(session)
     if manager.get_db_version() is None:
         manager.set_db_version(SCHEMA_VERSION)
+
+    admin = Group(name=u'admin')
+    admin_user = User(username=u'admin', 
+            first_name=u'Admin', 
+            last_name=u'',
+            email=u'',
+            password=u'!')
+    admin_user.groups.append(admin)
+    session.add(admin_user)
+
+def upgrade(session):
+    """Upgrade this package's schema to the latest version."""
+    import repoze.evolution
+    Base.metadata.create_all(session.bind)
+    manager = _get_evolution_manager(session)
+    repoze.evolution.evolve_to_latest(manager)
+
