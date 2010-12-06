@@ -15,6 +15,9 @@ from sqlalchemy.orm import relationship
 from cryptacular.core import DelegatingPasswordManager
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
+import logging
+logger = logging.getLogger(__name__)
+
 from ponzi_auth import base
 Base = declarative_base()
 
@@ -76,7 +79,7 @@ class User(Base):
     def check_password(self, raw_password):
         if not self.is_active: return False
         return self.passwordmanager.check(self.password, raw_password,
-                setter=self.set_password)
+                                          setter=self.set_password)
 
     def __str__(self):
         return 'user:%s' % self.username
@@ -126,12 +129,15 @@ def _get_evolution_manager(session):
 
 def initialize(session):
     if session.bind.has_table('user'):
+        logger.info('Database init not needed')
         return
 
     import ponzi_evolution
+    logger.info('Initalizing ponzi_evolution')
     ponzi_evolution.initialize(session)
 
     Base.metadata.create_all(session.bind)
+    logger.info('Database tables created')
     manager = _get_evolution_manager(session)
     if manager.get_db_version() is None:
         manager.set_db_version(SCHEMA_VERSION)
@@ -144,6 +150,7 @@ def initialize(session):
             password=u'!')
     admin_user.groups.append(admin)
     session.add(admin_user)
+    logger.info('Initial group and user created')
 
 def upgrade(session):
     """Upgrade this package's schema to the latest version."""
@@ -151,4 +158,4 @@ def upgrade(session):
     Base.metadata.create_all(session.bind)
     manager = _get_evolution_manager(session)
     repoze.evolution.evolve_to_latest(manager)
-
+    logger.info('Evolved database to correct incarnation')
