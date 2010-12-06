@@ -86,26 +86,41 @@ class ForgotPassword(Locatable, KeyTraverser):
         Locatable.__init__(self, name=name, parent=parent)
         KeyTraverser.__init__(self, session=session)
 
-class ExampleRoot(Locatable):
-    __acl__ = [(Allow, Everyone, 'view')]
-    def __init__(self, name=None, parent=None, session=None, children={}):
-        """
-        :param session: SQLAlchemy session
-        :param children: dictionary of additional traversable objects
-        """
+class DictTraverser(Locatable):
+    traverse = None
+
+    def __init__(self, name=None, parent=None):
         Locatable.__init__(self, name=name, parent=parent)
         self.traverse = {}
-        self.traverse['passwordreset'] = ForgotPassword(parent=self, session=session)
-        self.traverse['users'] = Users(parent=self, session=session)
-        self.traverse.update(children)
 
     def __getitem__(self, key):
         return self.traverse[key]
+
+class AuthRoot(DictTraverser):
+    __acl__ = [(Allow, Everyone, 'view')]
+    def __init__(self, name=None, parent=None, session=None):
+        """
+        :param session: SQLAlchemy session
+        """
+        super(AuthRoot, self).__init__(name=name, parent=parent)
+        self.traverse['passwordreset'] = ForgotPassword(parent=parent, session=session)
+        self.traverse['users'] = Users(parent=parent, session=session)
+
+class DefaultRoot(DictTraverser):
+    __acl__ = [(Allow, Everyone, 'view')]
+
+    def __init__(self, name=None, parent=None, session=None):
+        """
+        :param session: SQLAlchemy session
+        """
+        super(DefaultRoot, self).__init__(name=name, parent=parent)
+        self.traverse['auth'] = AuthRoot(name='auth', parent=self,
+                                         session=session)
+
 
 def get_root(request):
     # XXX must explicitly dispose of session at end of request:
     session = None
     if request:
         session = request.registry.settings['ponzi_auth.db_session_factory']()
-    return ExampleRoot(name='', parent=None, session=session)
-
+    return DefaultRoot(name='', parent=None, session=session)

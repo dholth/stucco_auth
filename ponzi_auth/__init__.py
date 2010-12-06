@@ -1,7 +1,7 @@
 import sqlalchemy
 from sqlalchemy import orm
 
-from ponzi_auth import views
+from ponzi_auth import views, tables
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.configuration import Configurator
@@ -10,24 +10,17 @@ from pyramid.events import NewRequest
 import pyramid_formish
 import pyramid_jinja2
 
-from ponzi_auth.views import find_groups
+from ponzi_auth.security import find_groups
+
 
 def assign_request_db(event):
     request = event.request
     views.get_dbsession(request) # assigns request.db as a side effect. XXX this is lame
 
-def main(global_config=None, **settings):
-    """Return a Pyramid WSGI application."""
+TEMPLATE_DIRS = ['ponzi_auth:templates']
 
-    import ponzi_auth.tables
-    from ponzi_auth.models import get_root
-
-    if global_config is None:
-        global_config = {}
-    settings = dict(settings)
-    settings.setdefault('jinja2.directories', 'ponzi_auth:templates')
-    settings.setdefault('ponzi_auth.allow_signup', False)
-    settings.setdefault('ponzi_auth.allow_password_reset', False) # not implemented yet
+def init_settings(settings):
+    settings.setdefault('jinja2.directories', TEMPLATE_DIRS[0])
     settings.setdefault('ponzi_auth.db_connect_string', 'sqlite:///ponzi_auth.db')
     settings.setdefault('ponzi_auth.db_engine',
                         sqlalchemy.create_engine(settings['ponzi_auth.db_connect_string']))
@@ -35,21 +28,16 @@ def main(global_config=None, **settings):
                         orm.sessionmaker(bind=settings['ponzi_auth.db_engine'],
                                          autocommit=False,
                                          autoflush=False))
+    settings.setdefault('ponzi_auth.allow_signup', False)
+    settings.setdefault('ponzi_auth.allow_password_reset', False) # not implemented yet
 
-    authentication_policy = AuthTktAuthenticationPolicy('oursecret',
-                                                        callback=find_groups)
-    authorization_policy = ACLAuthorizationPolicy()
-    config = Configurator(root_factory=get_root,
-                          settings=settings,
-                          authentication_policy=authentication_policy,
-                          authorization_policy=authorization_policy)
-
+def init_config(config, settings):
     config.load_zcml('ponzi_auth:configure.zcml')
 
     session = settings['ponzi_auth.db_session_factory']()
-    ponzi_auth.tables.initialize(session)
-    ponzi_auth.tables.upgrade(session) # XXX or as something like `manage.py upgrade`
-    session.commit()
+    tables.initialize(session)
+    tables.upgrade(session) # XXX or as something like `manage.py upgrade`
+    session.flush()
 
     session = settings['ponzi_auth.db_session_factory']()
     
@@ -71,5 +59,23 @@ def main(global_config=None, **settings):
     sm.registerUtility([resource_filename('pyramid_uniform', 'templates/zpt')],
             pyramid_formish.IFormishSearchPath)
 
-    return config.make_wsgi_app()
 
+def main(global_config=None, **settings):
+    """Return a Pyramid WSGI application."""
+
+    import ponzi_auth.tables
+    from ponzi_auth.models import get_root
+
+    if global_config is None:
+        global_config = {}
+    settings = dict(settings)
+    init_settings(settings)
+    authentication_policy = AuthTktAuthenticationPolicy('oursecret',
+                                                        callback=find_groups)
+    authorization_policy = ACLAuthorizationPolicy()
+    config = Configurator(root_factory=get_root,
+                          settings=settings,
+                          authentication_policy=authentication_policy,
+                          authorization_policy=authorization_policy)
+    init_config(config, settings)
+    return config.make_wsgi_app()

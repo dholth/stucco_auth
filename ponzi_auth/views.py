@@ -6,6 +6,7 @@ from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
 from ponzi_auth import tables
 from sqlalchemy.orm.exc import NoResultFound
+from ponzi_auth.models import AuthRoot
 
 import logging
 log = logging.getLogger(__name__)
@@ -19,7 +20,8 @@ def get_dbsession(request):
         return request.db
 
 @view_config(name='login',
-             renderer='login.html')
+             renderer='login.html',
+             context=AuthRoot)
 def login(request, username=None):
     logged_in = bool(username or security.authenticated_userid(request))
 
@@ -59,7 +61,8 @@ def login(request, username=None):
 
 
 @view_config(name='sign-up',
-             renderer='sign-up.html')
+             renderer='sign-up.html',
+             context=AuthRoot)
 def signup(request):
     if not request.registry.settings.get('ponzi_auth.allow_signup'):
         raise NotFound()
@@ -84,7 +87,7 @@ def signup(request):
                     setattr(user, f, request.params[f])
             user.set_password(request.params['password'])
             dbsession.add(user)
-            dbsession.commit()
+            dbsession.flush()
             status = u'Account created'
             status_type = u'info'
 
@@ -103,24 +106,10 @@ def view_model(request):
     """Do-nothing view. Template will reference request.context"""
     return {}
 
-@view_config(name='logout')
+@view_config(name='logout',
+             context=AuthRoot)
 def logout(request):
     came_from = request.params.get('came_from',
                                    model_url(request.root, request))
     return HTTPFound(location=came_from,
                      headers=security.forget(request))
-
-def find_user(request, username=None):
-    username = username or security.authenticated_userid(request)
-    if not username:
-        return None
-    db_session = get_dbsession(request)
-    return db_session.query(tables.User).filter_by(username=username).one()
-
-def find_groups(user, request):
-    if isinstance(user, basestring):
-        user = find_user(request, user)
-    if user is None:
-        return []
-
-    return user.groups

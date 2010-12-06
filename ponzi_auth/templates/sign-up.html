@@ -11,7 +11,7 @@
     <div class="status {{status_type}}">{{status}}</div>
   {% endif %}
 
-  <form action="{{request.application_url}}/sign-up" method="POST">
+  <form action="{{request.relative_url('sign-up')}}" method="POST">
     <div class="fields">
       <div class="field">
         <label for="username">Username:</label>
