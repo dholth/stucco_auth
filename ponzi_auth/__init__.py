@@ -33,8 +33,8 @@ def init_config(config, settings):
     config.load_zcml('ponzi_auth:configure.zcml')
 
     session = settings['ponzi_auth.db_session_factory']()
-    ponzi_auth.tables.initialize(session)
-    ponzi_auth.tables.upgrade(session) # XXX or as something like `manage.py upgrade`
+    tables.initialize(session)
+    tables.upgrade(session) # XXX or as something like `manage.py upgrade`
 
     session.commit()
     
@@ -60,7 +60,6 @@ def init_config(config, settings):
 def main(global_config=None, **settings):
     """Return a Pyramid WSGI application."""
 
-    import ponzi_auth.tables
     from ponzi_auth.models import get_root
 
     if global_config is None:
