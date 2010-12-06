@@ -32,9 +32,7 @@ def main(global_config=None, **settings):
     settings.setdefault('ponzi_auth.db_engine',
                         sqlalchemy.create_engine(settings['ponzi_auth.db_connect_string']))
     settings.setdefault('ponzi_auth.db_session_factory',
-                        orm.sessionmaker(bind=settings['ponzi_auth.db_engine'],
-                                         autocommit=False,
-                                         autoflush=False))
+                        orm.sessionmaker(bind=settings['ponzi_auth.db_engine']))
 
     authentication_policy = AuthTktAuthenticationPolicy('oursecret',
                                                         callback=find_groups)
@@ -49,7 +47,6 @@ def main(global_config=None, **settings):
     session = settings['ponzi_auth.db_session_factory']()
     ponzi_auth.tables.initialize(session)
     ponzi_auth.tables.upgrade(session) # XXX or as something like `manage.py upgrade`
-    session.commit()
 
     session = settings['ponzi_auth.db_session_factory']()
     
@@ -70,6 +67,8 @@ def main(global_config=None, **settings):
     sm = zope.component.getSiteManager()
     sm.registerUtility([resource_filename('pyramid_uniform', 'templates/zpt')],
             pyramid_formish.IFormishSearchPath)
+
+    session.commit()
 
     return config.make_wsgi_app()
 
