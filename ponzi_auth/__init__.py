@@ -36,7 +36,7 @@ def init_config(config, settings):
     tables.initialize(session)
     tables.upgrade(session) # XXX or as something like `manage.py upgrade`
 
-    session.commit()
+    session.flush()
     
     config.add_subscriber(assign_request_db, NewRequest)
 
