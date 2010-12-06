@@ -48,7 +48,7 @@ def main(global_config=None, **settings):
     ponzi_auth.tables.initialize(session)
     ponzi_auth.tables.upgrade(session) # XXX or as something like `manage.py upgrade`
 
-    session = settings['ponzi_auth.db_session_factory']()
+    session.commit()
     
     config.add_subscriber(assign_request_db, NewRequest)
 
@@ -67,8 +67,6 @@ def main(global_config=None, **settings):
     sm = zope.component.getSiteManager()
     sm.registerUtility([resource_filename('pyramid_uniform', 'templates/zpt')],
             pyramid_formish.IFormishSearchPath)
-
-    session.commit()
 
     return config.make_wsgi_app()
 
