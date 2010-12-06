@@ -39,6 +39,8 @@ setup(name='ponzi_auth',
       entry_points = """\
       [paste.app_factory]
       main = ponzi_auth:main
+      [paste.filter_app_factory]
+      tm = ponzi_auth.tm:make_tm
       """,
       paster_plugins=['pyramid'],
       )

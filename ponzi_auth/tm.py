@@ -23,7 +23,10 @@ class TM(object):
             environ['sqlalchemy.session'].close()
             if self.removable:
                 self.session_factory.remove()
+            del environ['sqlalchemy.session]
 
 def make_tm(app, global_conf):
-    return TM(app, global_conf['sqlalchemy.session_factory'])
+    import sqlalchemy.orm
+    Session = sqlalchemy.orm.sessionmaker(global_conf['sqlalchemy.url'])
+    return TM(app, Session)
 
