@@ -15,13 +15,15 @@ def test_evolution():
 
     ponzi_auth.tables.initialize(session)
 
-    session.flush()
-
     versions = {}
-    for row in session.execute("SELECT package, version FROM ponzi_evolution"):
-        versions[row['package']] = row['version']
+    for row in session.query(ponzi_evolution.SchemaVersion):
+        versions[row.package] = row.version
 
     assert 'ponzi_evolution' in versions, versions
     assert 'ponzi_auth' in versions, versions
     assert versions['ponzi_auth'] == ponzi_auth.tables.SCHEMA_VERSION
 
+    session.commit()
+
+    # the automatically added admin user
+    assert session.query(ponzi_auth.tables.User).count() > 0
