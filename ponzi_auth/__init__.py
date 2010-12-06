@@ -25,9 +25,7 @@ def init_settings(settings):
     settings.setdefault('ponzi_auth.db_engine',
                         sqlalchemy.create_engine(settings['ponzi_auth.db_connect_string']))
     settings.setdefault('ponzi_auth.db_session_factory',
-                        orm.sessionmaker(bind=settings['ponzi_auth.db_engine'],
-                                         autocommit=False,
-                                         autoflush=False))
+                        orm.sessionmaker(bind=settings['ponzi_auth.db_engine']))
     settings.setdefault('ponzi_auth.allow_signup', False)
     settings.setdefault('ponzi_auth.allow_password_reset', False) # not implemented yet
 
@@ -35,11 +33,10 @@ def init_config(config, settings):
     config.load_zcml('ponzi_auth:configure.zcml')
 
     session = settings['ponzi_auth.db_session_factory']()
-    tables.initialize(session)
-    tables.upgrade(session) # XXX or as something like `manage.py upgrade`
-    session.flush()
+    ponzi_auth.tables.initialize(session)
+    ponzi_auth.tables.upgrade(session) # XXX or as something like `manage.py upgrade`
 
-    session = settings['ponzi_auth.db_session_factory']()
+    session.commit()
     
     config.add_subscriber(assign_request_db, NewRequest)
 
