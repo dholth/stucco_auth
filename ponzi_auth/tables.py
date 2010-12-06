@@ -66,13 +66,6 @@ class User(Base):
             secondary = users_groups,
             backref="users")
 
-    def __init__(self, **kwargs):
-        for key,value in kwargs.items():
-            if key == 'password':
-                self.set_password(value)
-            else:
-                setattr(self, key, value)
-
     def is_anonymous(self):
         return False
 
