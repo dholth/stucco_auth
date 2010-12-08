@@ -1,5 +1,4 @@
-Copyright © 2010 Exactech, Inc. (Gainesville, FL; NASDAQ: EXAC) and
-contributors.
+Copyright © 2010 Exactech, Inc. (Gainesville, FL) and contributors.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

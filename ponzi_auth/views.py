@@ -12,12 +12,7 @@ import logging
 log = logging.getLogger(__name__)
 
 def get_dbsession(request):
-    # XXX this is lame
-    try:
-        return request.db
-    except:
-        request.db = request.registry.settings['ponzi_auth.db_session_factory']()
-        return request.db
+    return request.db
 
 @view_config(name='login',
              renderer='login.html',
@@ -44,7 +39,7 @@ def login(request, username=None):
                 came_from = request.params.get('came_from',
                                                model_url(request.root, request))
                 return HTTPFound(location=came_from,
-                                 headers=security.remember(request, username))
+                                 headers=security.remember(request, user.user_id))
         except NoResultFound:
             # just use above error msg
             pass
@@ -87,7 +82,6 @@ def signup(request):
                     setattr(user, f, request.params[f])
             user.set_password(request.params['password'])
             dbsession.add(user)
-            dbsession.flush()
             status = u'Account created'
             status_type = u'info'
 

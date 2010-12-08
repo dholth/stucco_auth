@@ -19,7 +19,6 @@ import sqlalchemy
 import uuid
 import validatish
 
-from ponzi_auth.cracklib import fascist_check
 from ponzi_auth.tables import User, PasswordReset
 
 import logging
@@ -44,8 +43,7 @@ def get_user(request):
 
 
 def StrongPassword(password):
-    error = fascist_check(password)
-    if error:
+    if len(password) < 5: # XXX a better implementation is in cracklib
         raise validatish.Invalid(u"Bad password: %s" % error)
 
 def OptionalStrongPassword(password):
