@@ -1,11 +1,11 @@
 """Verify schema versioning is setup correctly."""
-
 import sqlalchemy
 import sqlalchemy.orm
 
 def test_evolution():
     import logging
     logging.basicConfig(level=logging.DEBUG)
+
     import ponzi_evolution
     import ponzi_auth.tables
 
@@ -14,6 +14,8 @@ def test_evolution():
     session = Session()
 
     ponzi_auth.tables.initialize(session)
+    ponzi_auth.tables.initialize(session) # catch 'already created' case
+    ponzi_auth.tables.upgrade(session)
 
     versions = {}
     for row in session.query(ponzi_evolution.SchemaVersion):

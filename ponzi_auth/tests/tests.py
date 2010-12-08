@@ -64,6 +64,15 @@ class TableTests(unittest.TestCase):
         pr = ponzi_auth.tables.PasswordReset()
         self.assertTrue(pr.isexpired())
 
+    def test_view_plural(self):
+        context = range(10)
+        class MockRequest(object): pass
+        request = MockRequest()
+        request.context = context
+        assert ponzi_auth.views.view_plural(request)['items'] == list(context)
+
+    def test_view_model(self):
+        assert ponzi_auth.views.view_model(None) == {}
 
 import ponzi_auth
 
