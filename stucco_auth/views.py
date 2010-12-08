@@ -1,12 +1,13 @@
-import datetime
-from pyramid.view import view_config
-from pyramid import security
-from pyramid.url import model_url
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
-from ponzi_auth import tables
+from pyramid import security
+from pyramid.url import model_url
+from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
-from ponzi_auth.models import AuthRoot
+from stucco_auth import tables
+from stucco_auth.models import AuthRoot
+
+import datetime
 
 import logging
 log = logging.getLogger(__name__)
@@ -50,8 +51,8 @@ def login(request, username=None):
         'status': status,
         'logged_in': False,
         'username': request.params.get('username', u''),
-        'allow_signup': request.registry.settings.get('ponzi_auth.allow_signup') or False,
-        'allow_password_reset': request.registry.settings.get('ponzi_auth.allow_password_reset') or False,
+        'allow_signup': request.registry.settings.get('stucco_auth.allow_signup') or False,
+        'allow_password_reset': request.registry.settings.get('stucco_auth.allow_password_reset') or False,
         }
 
 
@@ -59,7 +60,7 @@ def login(request, username=None):
              renderer='sign-up.html',
              context=AuthRoot)
 def signup(request):
-    if not request.registry.settings.get('ponzi_auth.allow_signup'):
+    if not request.registry.settings.get('stucco_auth.allow_signup'):
         raise NotFound()
 
     status = u''

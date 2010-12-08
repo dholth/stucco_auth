@@ -11,7 +11,7 @@ import copy
 
 from pyramid.security import Allow, Everyone, DENY_ALL
 
-from ponzi_auth.tables import User, PasswordReset
+from stucco_auth.tables import User, PasswordReset
 
 class Locatable(object):
     """Set ``self.__name__`` and ``self.__parent__`` from keyword

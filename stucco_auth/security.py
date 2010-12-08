@@ -1,5 +1,5 @@
-from ponzi_auth.tables import User
-from ponzi_auth.views import get_dbsession
+from stucco_auth.tables import User
+from stucco_auth.views import get_dbsession
 import pyramid.security
 
 

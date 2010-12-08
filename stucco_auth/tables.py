@@ -19,12 +19,12 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 import logging
 logger = logging.getLogger(__name__)
 
-from ponzi_auth import base
+from stucco_auth import base
 Base = declarative_base()
 
 SCHEMA_VERSION = 0
-SCHEMA_PACKAGENAME = 'ponzi_auth'
-SCHEMA_EVOLVESCRIPTS = 'ponzi_auth.evolve'
+SCHEMA_PACKAGENAME = 'stucco_auth'
+SCHEMA_EVOLVESCRIPTS = 'stucco_auth.evolve'
 
 users_groups = sqlalchemy.Table('user_group', Base.metadata,
     Column('user_id', Integer, ForeignKey('user.user_id'), 
@@ -120,14 +120,14 @@ class PasswordReset(Base):
 
 class Settings(Base):
     """Simple key/value settings storage."""
-    __tablename__ = 'ponzi_settings'
+    __tablename__ = 'stucco_settings'
 
     key = Column(String(32), nullable=False, primary_key=True)
     value = Column(PickleType(pickler=json))
 
 def _get_evolution_manager(session):
     """Return an object capable of running numbered evolveN.py scripts."""
-    from ponzi_evolution import SQLAlchemyEvolutionManager
+    from stucco_evolution import SQLAlchemyEvolutionManager
     manager = SQLAlchemyEvolutionManager(session,
             SCHEMA_EVOLVESCRIPTS,
             SCHEMA_VERSION,
@@ -136,19 +136,19 @@ def _get_evolution_manager(session):
 
 def initialize(session):
     """Create this package's tables if they don't exist."""
-    if session.bind.has_table('user'):
-        logger.info('Database init not needed')
+
+    import stucco_evolution
+    logger.info('Initalizing stucco_evolution')
+    stucco_evolution.initialize(session)
+
+    manager = _get_evolution_manager(session)
+    if manager.get_db_version() is not None:
         return
 
-    import ponzi_evolution
-    logger.info('Initalizing ponzi_evolution')
-    ponzi_evolution.initialize(session)
+    manager.set_db_version(SCHEMA_VERSION)
 
     Base.metadata.create_all(session.bind)
     logger.info('Database tables created')
-    manager = _get_evolution_manager(session)
-    if manager.get_db_version() is None:
-        manager.set_db_version(SCHEMA_VERSION)
 
     admin = Group(name=u'admin')
     admin_user = User(username=u'admin', 
@@ -167,3 +167,4 @@ def upgrade(session):
     manager = _get_evolution_manager(session)
     repoze.evolution.evolve_to_latest(manager)
     logger.info('Evolved database to correct incarnation')
+

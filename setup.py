@@ -8,16 +8,16 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'cryptacular',
-    'ponzi_evolution',
     'pyramid',
     'pyramid_beaker',
     'pyramid_formish',
     'pyramid_jinja2',
+    'stucco_evolution',
 ]
 
-setup(name='ponzi_auth',
+setup(name='stucco_auth',
       version='0.0',
-      description='ponzi_auth',
+      description='stucco_auth',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "License :: OSI Approved :: BSD License",
@@ -28,19 +28,19 @@ setup(name='ponzi_auth',
       license='BSD',
       author='Daniel Holth',
       author_email='dholth@fastmail.fm',
-      url='http://bitbucket.org/dholth/ponzi_auth',
+      url='http://bitbucket.org/dholth/stucco_auth',
       keywords='web pyramid pylons',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="ponzi_auth.tests",
+      test_suite="stucco_auth.tests",
       entry_points = """\
       [paste.app_factory]
-      main = ponzi_auth:main
+      main = stucco_auth:main
       [paste.filter_app_factory]
-      tm = ponzi_auth.tm:make_tm
+      tm = stucco_auth.tm:make_tm
       """,
       paster_plugins=['pyramid'],
       )

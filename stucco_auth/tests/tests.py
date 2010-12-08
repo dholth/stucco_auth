@@ -1,7 +1,7 @@
 import unittest
 
-import ponzi_auth.tables
-from ponzi_auth.tables import Group
+import stucco_auth.tables
+from stucco_auth.tables import Group
 
 import sqlalchemy
 import sqlalchemy.orm
@@ -12,10 +12,10 @@ class TableTests(unittest.TestCase):
         engine = sqlalchemy.create_engine('sqlite:///:memory:', echo=False)
         self.Session = sqlalchemy.orm.sessionmaker(bind=engine)
         session = self.Session()
-        ponzi_auth.tables.initialize(session)
+        stucco_auth.tables.initialize(session)
 
     def test_user(self):
-        user = ponzi_auth.tables.User(username='alice',
+        user = stucco_auth.tables.User(username='alice',
             first_name='Alice', last_name='Liddell',
             email='alice@example.org')
 
@@ -39,7 +39,7 @@ class TableTests(unittest.TestCase):
         assert group2 in user.groups
 
     def test_password(self):
-        user = ponzi_auth.tables.User(is_active=True)
+        user = stucco_auth.tables.User(is_active=True)
         user.set_password('mimsy')
         assert user.check_password('mimsy')
         assert not user.check_password('borogroves')
@@ -51,17 +51,17 @@ class TableTests(unittest.TestCase):
         assert not user.check_password('borogroves')
 
     def test_group(self):
-        group = ponzi_auth.tables.Group()
+        group = stucco_auth.tables.Group()
         group.name = 'testgroup'
         self.assertEqual(str(group), 'group:testgroup')
 
     def test_anonymous(self):
-        user = ponzi_auth.tables.AnonymousUser()
+        user = stucco_auth.tables.AnonymousUser()
         self.assertTrue(user.is_anonymous())
         self.assertFalse(user.check_password('foo'))
 
     def test_password_reset(self):
-        pr = ponzi_auth.tables.PasswordReset()
+        pr = stucco_auth.tables.PasswordReset()
         self.assertTrue(pr.isexpired())
 
     def test_view_plural(self):
@@ -69,22 +69,22 @@ class TableTests(unittest.TestCase):
         class MockRequest(object): pass
         request = MockRequest()
         request.context = context
-        assert ponzi_auth.views.view_plural(request)['items'] == list(context)
+        assert stucco_auth.views.view_plural(request)['items'] == list(context)
 
     def test_view_model(self):
-        assert ponzi_auth.views.view_model(None) == {}
+        assert stucco_auth.views.view_model(None) == {}
 
-import ponzi_auth
+import stucco_auth
 
 # disabled for now
 # class MainTests(unittest.TestCase):
 
 #     def test_main(self):
-#         settings = {'ponzi_auth.db_session_factory': MockDBSession}
-#         app = ponzi_auth.main({}, **settings)
+#         settings = {'stucco_auth.db_session_factory': MockDBSession}
+#         app = stucco_auth.main({}, **settings)
 #         assert hasattr(app, 'registry')
 
-from ponzi_auth.models import get_root
+from stucco_auth.models import get_root
 
 class ModelsTests(unittest.TestCase):
     
@@ -92,7 +92,7 @@ class ModelsTests(unittest.TestCase):
         root = get_root(None)
         assert root is not None
 
-import ponzi_auth.views 
+import stucco_auth.views 
 from pyramid.testing import DummyRequest
 from sqlalchemy.orm.exc import NoResultFound
 from pyramid.exceptions import NotFound
@@ -150,20 +150,20 @@ class ViewsTests(unittest.TestCase):
         self.db_session = MockDBSession()
         self.db_session.data = []
         self.request.db = self.db_session
-        self.settings['ponzi_auth.db_session_factory'] = \
+        self.settings['stucco_auth.db_session_factory'] = \
             lambda db_session=self.db_session: db_session
 
     def tearDown(self):
         pass
 
     def test_get_dbsession(self):
-        self.assertTrue(isinstance(ponzi_auth.views.get_dbsession(self.request),
+        self.assertTrue(isinstance(stucco_auth.views.get_dbsession(self.request),
                                    MockDBSession))
 
     def test_login(self):
-        d = ponzi_auth.views.login(self.request)
+        d = stucco_auth.views.login(self.request)
         self.assertEqual(d['status_type'], u'')
-        d = ponzi_auth.views.login(self.request, username='foo')
+        d = stucco_auth.views.login(self.request, username='foo')
         self.assertEqual(d['status_type'], u'info')
 
     def test_post_login(self):
@@ -172,27 +172,27 @@ class ViewsTests(unittest.TestCase):
         self.request.params['username'] = 'user1'
         self.request.params['password'] = 'user1'
 
-        d = ponzi_auth.views.login(self.request)
+        d = stucco_auth.views.login(self.request)
         self.assertEqual(d['status_type'], u'error')
 
-        class User(ponzi_auth.tables.AnonymousUser):
+        class User(stucco_auth.tables.AnonymousUser):
             def check_password(self, p):
                 return True
 
         self.db_session.add(User())
-        d = ponzi_auth.views.login(self.request)
+        d = stucco_auth.views.login(self.request)
         self.assertTrue(isinstance(d, HTTPFound))
 
     def test_signup(self):
         # by default signup is disabled
-        self.assertRaises(NotFound, lambda: ponzi_auth.views.signup(self.request))
+        self.assertRaises(NotFound, lambda: stucco_auth.views.signup(self.request))
 
-        self.settings['ponzi_auth.allow_signup'] = True
-        d = ponzi_auth.views.signup(self.request)
+        self.settings['stucco_auth.allow_signup'] = True
+        d = stucco_auth.views.signup(self.request)
         self.assertEqual(d['status_type'], u'')
 
     def test_post_signup(self):
-        self.settings['ponzi_auth.allow_signup'] = True
+        self.settings['stucco_auth.allow_signup'] = True
         self.request.method = 'POST'
         self.request.params['form.submitted'] = True
         self.request.params['username'] = 'user1'
@@ -200,28 +200,28 @@ class ViewsTests(unittest.TestCase):
         self.request.params['firstname'] = 'foo'
 
         # should successfully sign up and add a new user
-        d = ponzi_auth.views.signup(self.request)
+        d = stucco_auth.views.signup(self.request)
         self.assertEqual(d['status_type'], u'info')
 
         # will fail because of creating with same username
-        d = ponzi_auth.views.signup(self.request)
+        d = stucco_auth.views.signup(self.request)
         self.assertEqual(d['status_type'], u'error')
 
     def test_logout(self):
-        d = ponzi_auth.views.logout(self.request)
+        d = stucco_auth.views.logout(self.request)
         self.assertTrue(isinstance(d, HTTPFound))
 
     def test_find_user(self):
-        d = ponzi_auth.security.find_user(self.request)
+        d = stucco_auth.security.find_user(self.request)
         self.assertTrue(d is None)
         self.assertRaises(NoResultFound,
-                          lambda: ponzi_auth.security.find_user(self.request, 'foo'))
+                          lambda: stucco_auth.security.find_user(self.request, 'foo'))
 
     def test_find_groups(self):
-        user = ponzi_auth.tables.AnonymousUser()
-        user.groups.append(ponzi_auth.tables.Group(name='agroup'))
+        user = stucco_auth.tables.AnonymousUser()
+        user.groups.append(stucco_auth.tables.Group(name='agroup'))
         self.db_session.data = [user]
-        find_groups = ponzi_auth.security.find_groups
+        find_groups = stucco_auth.security.find_groups
         assert 'group:agroup' in find_groups(user, self.request)
         # MockDBSession is not this smart. Could use sqlite:///:memory: instead...
         # self.assertEqual([], [x for x in find_groups(None, self.request)])

@@ -72,17 +72,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/ponzi_auth.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/StuccoAuth.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/ponzi_auth.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/StuccoAuth.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/ponzi_auth"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/ponzi_auth"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/StuccoAuth"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/StuccoAuth"
 	@echo "# devhelp"
 
 epub:

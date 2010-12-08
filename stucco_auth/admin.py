@@ -19,7 +19,7 @@ import sqlalchemy
 import uuid
 import validatish
 
-from ponzi_auth.tables import User, PasswordReset
+from stucco_auth.tables import User, PasswordReset
 
 import logging
 log = logging.getLogger(__name__)

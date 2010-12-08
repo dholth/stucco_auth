@@ -3,7 +3,7 @@ from sqlalchemy import orm
 import os
 import sqlalchemy
 
-from ponzi_auth import views, tables
+from stucco_auth import views, tables
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.configuration import Configurator
@@ -12,8 +12,8 @@ from pyramid.events import NewRequest
 import pyramid_formish
 import pyramid_jinja2
 
-from ponzi_auth import security
-from ponzi_auth.tm import TM
+from stucco_auth import security
+from stucco_auth.tm import TM
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,27 +21,27 @@ logger = logging.getLogger(__name__)
 def assign_request_db(event):
     event.request.db = event.request.environ['sqlalchemy.session']
 
-TEMPLATE_DIRS = ['ponzi_auth:templates']
+TEMPLATE_DIRS = ['stucco_auth:templates']
 
 def init_settings(settings):
-    from ponzi_auth import tables, security
-    from ponzi_auth.models import get_root
+    from stucco_auth import tables, security
+    from stucco_auth.models import get_root
 
-    settings.setdefault('ponzi_auth.allow_signup', False)
-    settings.setdefault('ponzi_auth.allow_password_reset', False) # not implemented yet
+    settings.setdefault('stucco_auth.allow_signup', False)
+    settings.setdefault('stucco_auth.allow_password_reset', False) # not implemented yet
     settings.setdefault('jinja2.directories', '\n'.join(TEMPLATE_DIRS))
-    settings.setdefault('ponzi_auth.db_connect_string', 'sqlite:///ponzi_auth.db')
-    settings.setdefault('ponzi_auth.db_engine',
-                        sqlalchemy.create_engine(settings['ponzi_auth.db_connect_string']))
-    settings.setdefault('ponzi_auth.db_session_factory',
-                        orm.sessionmaker(bind=settings['ponzi_auth.db_engine']))
+    settings.setdefault('stucco_auth.db_connect_string', 'sqlite:///stucco_auth.db')
+    settings.setdefault('stucco_auth.db_engine',
+                        sqlalchemy.create_engine(settings['stucco_auth.db_connect_string']))
+    settings.setdefault('stucco_auth.db_session_factory',
+                        orm.sessionmaker(bind=settings['stucco_auth.db_engine']))
 
 def init_config(config, settings):
-    config.load_zcml('ponzi_auth:configure.zcml')
+    config.load_zcml('stucco_auth:configure.zcml')
 
     config.add_renderer('.html', pyramid_jinja2.renderer_factory)
     config.add_renderer('.txt', pyramid_jinja2.renderer_factory)
-    config.scan('ponzi_auth')
+    config.scan('stucco_auth')
 
     # Configure beaker session:
     import pyramid_beaker
@@ -51,12 +51,14 @@ def init_config(config, settings):
 
 def main(global_config=None, **settings):
     """Return a Pyramid WSGI application."""
+    from stucco_auth.models import get_root
+
     if global_config is None:
         global_config = {}
     settings = dict(settings)
     init_settings(settings)
 
-    session = settings['ponzi_auth.db_session_factory']()
+    session = settings['stucco_auth.db_session_factory']()
     tables.initialize(session)
     tables.upgrade(session) # XXX or as something like `manage.py upgrade`
 
@@ -69,7 +71,7 @@ def main(global_config=None, **settings):
         session.add(tkt_secret)
 
     authentication_policy = AuthTktAuthenticationPolicy(tkt_secret.value,
-                                                        callback=security.lookup_groups)
+                                                        callback=security.find_groups)
 
     authorization_policy = ACLAuthorizationPolicy()
 
@@ -79,15 +81,14 @@ def main(global_config=None, **settings):
                           authorization_policy=authorization_policy)
     init_config(config, settings)
 
-    # event handler will only work if ponzi_auth.tm is being used
+    # event handler will only work if stucco_auth.tm is being used
     config.add_subscriber(assign_request_db, NewRequest)
     app = config.make_wsgi_app()
-    tm = TM(app, settings['ponzi_auth.db_session_factory'])
+    tm = TM(app, settings['stucco_auth.db_session_factory'])
 
     # For pshell compatibility:
     tm.registry, tm.threadlocal_manager, tm.root_factory = \
             app.registry, app.threadlocal_manager, app.root_factory
-    from ponzi_auth.models import get_root
 
     # In case database work was done during init:
     session.commit()

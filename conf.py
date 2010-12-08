@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# ponzi_auth documentation build configuration file, created by
-# sphinx-quickstart on Tue Dec  7 21:51:33 2010.
+# Stucco Auth documentation build configuration file, created by
+# sphinx-quickstart on Wed Dec  8 14:54:08 2010.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -25,7 +25,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = []
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ponzi_auth'
+project = u'Stucco Auth'
 copyright = u'2010, Daniel Holth'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'ponzi_authdoc'
+htmlhelp_basename = 'StuccoAuthdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -178,7 +178,7 @@ htmlhelp_basename = 'ponzi_authdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'ponzi_auth.tex', u'ponzi\\_auth Documentation',
+  ('index', 'StuccoAuth.tex', u'Stucco Auth Documentation',
    u'Daniel Holth', 'manual'),
 ]
 
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ponzi_auth', u'ponzi_auth Documentation',
+    ('index', 'stuccoauth', u'Stucco Auth Documentation',
      [u'Daniel Holth'], 1)
 ]

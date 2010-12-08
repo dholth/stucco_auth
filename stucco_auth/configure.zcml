@@ -78,7 +78,7 @@
 
    <static
      name="static"
-     path="ponzi_auth:static"
+     path="stucco_auth:static"
      />
 
 </configure>
