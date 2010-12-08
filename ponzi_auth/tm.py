@@ -1,7 +1,9 @@
 
+SESSION_KEY = 'sqlalchemy.session'
+
 def get_session(request):
     """Return SQLAlchemy session for this request."""
-    return request.environ['sqlalchemy.session']
+    return request.environ[SESSION_KEY]
 
 class TM(object):
     """Simple SQLAlchemy-only transaction manager."""
@@ -15,7 +17,7 @@ class TM(object):
         self.application = app
 
     def __call__(self, environ, start_response):
-        environ['sqlalchemy.session'] = session = self.session_factory()
+        environ[SESSION_KEY] = session = self.session_factory()
         try:
             result = self.application(environ, start_response)
             session.commit()
@@ -25,7 +27,7 @@ class TM(object):
             raise
         finally:
             session.close()
-            environ.pop('sqlalchemy.session', None)
+            environ.pop(SESSION_KEY, None)
             if self.removable:
                 self.session_factory.remove()
 
