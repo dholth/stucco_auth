@@ -10,7 +10,7 @@ def test_get_session():
     request.environ = {stucco_auth.tm.SESSION_KEY:'session'}
     assert stucco_auth.tm.get_session(request) == 'session'
 
-def test_tm():
+def build_mocks():
     class MockSession(object):
         def commit(self):
             self.committed = True
@@ -23,6 +23,11 @@ def test_tm():
     def session_factory():
         return session[0]
 
+    return session, session_factory
+
+def test_tm_0():
+    session, session_factory = build_mocks()
+
     def app(environ, start_response):
         assert stucco_auth.tm.SESSION_KEY in environ
 
@@ -32,10 +37,12 @@ def test_tm():
     assert session[0].closed
     assert not hasattr(session[0], 'rolledback')
 
+def test_tm_1():
+    session, session_factory = build_mocks()
 
-    session[0] = MockSession()
     def app2(environ, start_response):
         raise Exception()
+
     tm2 = stucco_auth.tm.TM(app2, session_factory)
     try:
         tm2({}, None)
@@ -44,6 +51,11 @@ def test_tm():
         assert session[0].closed
         assert not hasattr(session[0], 'committed')
 
+def test_tm_2():
+    session, session_factory = build_mocks()
+
+    def app(environ, start_response):
+        assert stucco_auth.tm.SESSION_KEY in environ
 
     class RemovableSessionFactory(object):
         def __call__(self):
