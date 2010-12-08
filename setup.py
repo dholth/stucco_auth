@@ -35,7 +35,7 @@ setup(name='ponzi_auth',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="ponzi_auth",
+      test_suite="ponzi_auth.tests",
       entry_points = """\
       [paste.app_factory]
       main = ponzi_auth:main
