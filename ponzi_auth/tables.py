@@ -5,10 +5,11 @@ Schema inspired by django.contrib.auth
 """
 
 import datetime
-
 import sqlalchemy
+import json
+
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, Unicode, Integer, Boolean
+from sqlalchemy import Column, String, Unicode, Integer, Boolean, PickleType
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -114,6 +115,12 @@ class PasswordReset(Base):
     def isexpired(self):
         return self.expires is None or self.expires < datetime.datetime.utcnow()
 
+class Settings(Base):
+    """Simple key/value settings storage."""
+    __tablename__ = 'ponzi_settings'
+
+    key = Column(String(32), nullable=False, primary_key=True)
+    value = Column(PickleType(pickler=json))
 
 def _get_evolution_manager(session):
     """Return an object capable of running numbered evolveN.py scripts."""
@@ -125,6 +132,7 @@ def _get_evolution_manager(session):
     return manager
 
 def initialize(session):
+    """Create this package's tables if they don't exist."""
     if session.bind.has_table('user'):
         return
 

@@ -10,3 +10,4 @@ syntax:glob
 *.pyc
 *.rej
 *.so
+_build

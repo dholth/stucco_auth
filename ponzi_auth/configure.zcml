@@ -7,19 +7,6 @@
   <!-- this must be included for the form declarations to work -->
   <include package="pyramid_formish" file="meta.zcml" />
 
-  <authtktauthenticationpolicy
-    cookie_name="ponzi_auth"
-    secret="32dd4fde-7d5a-4380-b122-f4d78cdee4c6"
-    callback=".security.lookup_groups"
-    timeout="2880"
-    reissue_time="288"
-    include_ip="True"
-    http_only="True"
-    secure="False"
-    path="/" />
-
-  <aclauthorizationpolicy />
-
   <formish:form
      for=".models.User"
      renderer="user_edit.html"

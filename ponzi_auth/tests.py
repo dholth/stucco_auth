@@ -101,6 +101,9 @@ class MockDBSession(object):
             raise NoResultFound()
         return self.data[0]
 
+    def get(self, key):
+        return self.data[0]
+
     def add(self, obj):
         self.data.append(obj)
 
@@ -117,6 +120,7 @@ class ViewsTests(unittest.TestCase):
         self.settings = self.request.registry.settings = {}
         self.db_session = MockDBSession()
         self.db_session.data = []
+        self.request.db = self.db_session
         self.settings['ponzi_auth.db_session_factory'] = \
             lambda db_session=self.db_session: db_session
 
@@ -186,8 +190,12 @@ class ViewsTests(unittest.TestCase):
 
     def test_find_groups(self):
         user = ponzi_auth.tables.AnonymousUser()
+        user.groups.append(ponzi_auth.tables.Group(name='agroup'))
+        self.db_session.data = [user]
         find_groups = ponzi_auth.views.find_groups
-        self.assertEqual([], [x for x in find_groups(None, self.request)])
-        self.assertEqual([], [x for x in find_groups(user, self.request)])
-        self.assertRaises(NoResultFound,
-                          lambda: self.assertEqual([], [x for x in find_groups('foo', self.request)]))
+        assert 'group:agroup' in find_groups(user.user_id, self.request)
+        # MockDBSession is not this smart. Could use sqlite:///:memory: instead...
+        # self.assertEqual([], [x for x in find_groups(None, self.request)])
+        # self.assertEqual([], [x for x in find_groups(user, self.request)])
+        # self.assertRaises(NoResultFound,
+        #                   lambda: self.assertEqual([], [x for x in find_groups('foo', self.request)]))
