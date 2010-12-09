@@ -97,8 +97,10 @@ class DictTraverser(Locatable):
         return self.traverse[key]
 
 class AuthRoot(DictTraverser):
-    __acl__ = [(Allow, Everyone, 'view'),
-            (Allow, Everyone, 'sign-up')]
+    __acl__ = [
+            (Allow, Everyone, 'view'),
+            (Allow, Everyone, 'sign-up'),
+            ]
     def __init__(self, name=None, parent=None, session=None):
         """
         :param session: SQLAlchemy session

@@ -48,7 +48,7 @@ def login(request, username=None):
             pass
 
     signup_link = u''
-    if security.view_execution_permitted(request.context, 'sign-up'):
+    if security.view_execution_permitted(request.context, request, name='sign-up'):
         signup_link = Markup(
         """<div class="login-action signup">Don't have a user account?
         <a href="%s">Sign up here</a></div>""" % 
