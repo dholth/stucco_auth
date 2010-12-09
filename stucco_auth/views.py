@@ -1,3 +1,4 @@
+from jinja2 import Markup, escape
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
 from pyramid import security
@@ -17,7 +18,8 @@ def get_dbsession(request):
 
 @view_config(name='login',
              renderer='login.html',
-             context=AuthRoot)
+             context=AuthRoot,
+             permission='view')
 def login(request, username=None):
     logged_in = bool(username or security.authenticated_userid(request))
 
@@ -45,20 +47,29 @@ def login(request, username=None):
             # just use above error msg
             pass
 
+    signup_link = u''
+    if security.view_execution_permitted(request.context, 'sign-up'):
+        signup_link = Markup(
+        """<div class="login-action signup">Don't have a user account?
+        <a href="%s">Sign up here</a></div>""" % 
+        escape(request.relative_url('sign-up'))
+        )
+
     return {
         'form_enabled': True,
         'status_type': status_type,
         'status': status,
         'logged_in': False,
         'username': request.params.get('username', u''),
-        'allow_signup': request.registry.settings.get('stucco_auth.allow_signup') or False,
+        'signup_link':signup_link,
         'allow_password_reset': request.registry.settings.get('stucco_auth.allow_password_reset') or False,
         }
 
 
 @view_config(name='sign-up',
              renderer='sign-up.html',
-             context=AuthRoot)
+             context=AuthRoot,
+             permission='sign-up')
 def signup(request):
     if not request.registry.settings.get('stucco_auth.allow_signup'):
         raise NotFound()

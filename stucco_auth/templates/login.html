@@ -27,7 +27,7 @@
     <input type="submit" value="Log-In" name="form.submitted" {% if not form_enabled %}disabled{% endif %}/>
     <div class="clear"><!-- --></div>
   </form>
-{% if allow_signup %}<div class="login-action signup">Don't have a user account?  <a href="{{request.relative_url('sign-up')}}">Sign up here</a></div>{% endif %}
+  {{ signup_link }}
 {% if allow_password_reset %}<div class="login-action password-reset">Can't remember your password? <a href="{{request.relative_url('password-reset')}}">Click here to reset.</a></div>{% endif %}
 {% if logged_in %}<div class="login-action logout"><a href="{{request.relative_url('logout')}}">Click here to log out.</a></div>{% endif %}
 </fieldset>

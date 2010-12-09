@@ -97,7 +97,8 @@ class DictTraverser(Locatable):
         return self.traverse[key]
 
 class AuthRoot(DictTraverser):
-    __acl__ = [(Allow, Everyone, 'view')]
+    __acl__ = [(Allow, Everyone, 'view'),
+            (Allow, Everyone, 'sign-up')]
     def __init__(self, name=None, parent=None, session=None):
         """
         :param session: SQLAlchemy session
@@ -122,5 +123,5 @@ def get_root(request):
     # XXX must explicitly dispose of session at end of request:
     session = None
     if request:
-        session = request.registry.settings['ponzi_auth.db_session_factory']()
+        session = request.db
     return DefaultRoot(name='', parent=None, session=session)
