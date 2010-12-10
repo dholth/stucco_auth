@@ -44,6 +44,18 @@ class Group(Base):
 
 # base.AbstractGroup.register(Group)
 
+from cryptacular.core import PasswordChecker
+class ShortPasswordChecker(PasswordChecker):
+    """Match and return false on check() for <= 1-character password
+    hashes and None. DelegatingPasswordManager would otherwise throw
+    an exception 'unrecognized password hash'.
+    """
+    def match(self, encoded):
+        if not encoded or len(encoded) < 2:
+                return True
+    def check(self, encoded, password):
+        return False
+
 class User(Base):
     __tablename__ = 'user'
 
@@ -52,7 +64,7 @@ class User(Base):
     # format when the correct password is provided:
     passwordmanager = DelegatingPasswordManager(
             preferred=BCRYPTPasswordManager(),
-            fallbacks=()
+            fallbacks=(ShortPasswordChecker(),)
             )
 
     user_id = Column(Integer, primary_key=True, nullable=False)
@@ -60,7 +72,7 @@ class User(Base):
     first_name = Column(Unicode(30))
     last_name = Column(Unicode(30))
     email = Column(Unicode(30))
-    password = Column(String(80), default='', nullable=False)
+    password = Column(String(80), default='*', nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     last_login = Column(DateTime)
     last_password_change = Column(DateTime, default=datetime.date(2001,1,1))
@@ -155,7 +167,7 @@ def initialize(session):
             first_name=u'Admin', 
             last_name=u'',
             email=u'',
-            password=u'!',
+            password=u'*',
             is_active=False)
     admin_user.groups.append(admin)
     session.add(admin_user)

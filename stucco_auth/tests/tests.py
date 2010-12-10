@@ -39,7 +39,9 @@ class TableTests(unittest.TestCase):
         assert group2 in user.groups
 
     def test_password(self):
-        user = stucco_auth.tables.User(is_active=True)
+        user = stucco_auth.tables.User(is_active=True, password='*')
+        assert user.check_password('anything') == False
+        
         user.set_password('mimsy')
         assert user.check_password('mimsy')
         assert not user.check_password('borogroves')
