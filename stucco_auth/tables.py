@@ -17,9 +17,10 @@ from cryptacular.core import DelegatingPasswordManager
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
-from stucco_auth import base
+# from stucco_auth import base
+
 Base = declarative_base()
 
 SCHEMA_VERSION = 0
@@ -41,8 +42,7 @@ class Group(Base):
     def __str__(self):
         return 'group:%s' % self.name
 
-base.AbstractGroup.register(Group)
-
+# base.AbstractGroup.register(Group)
 
 class User(Base):
     __tablename__ = 'user'
@@ -85,7 +85,7 @@ class User(Base):
     def __str__(self):
         return 'user:%s' % self.username
 
-base.AbstractUser.register(User)
+# base.AbstractUser.register(User)
 
 class AnonymousUser(User):
 
@@ -119,7 +119,7 @@ class PasswordReset(Base):
         return self.expires is None or self.expires < datetime.datetime.utcnow()
 
 class Settings(Base):
-    """Simple key/value settings storage."""
+    """Simple key/value settings storage. Value is stored as JSON."""
     __tablename__ = 'stucco_settings'
 
     key = Column(String(32), nullable=False, primary_key=True)
@@ -138,7 +138,7 @@ def initialize(session):
     """Create this package's tables if they don't exist."""
 
     import stucco_evolution
-    logger.info('Initalizing stucco_evolution')
+    log.info('Initalizing stucco_evolution')
     stucco_evolution.initialize(session)
 
     manager = _get_evolution_manager(session)
@@ -148,17 +148,19 @@ def initialize(session):
     manager.set_db_version(SCHEMA_VERSION)
 
     Base.metadata.create_all(session.bind)
-    logger.info('Database tables created')
+    log.info('Database tables created')
 
     admin = Group(name=u'admin')
     admin_user = User(username=u'admin', 
             first_name=u'Admin', 
             last_name=u'',
             email=u'',
-            password=u'!')
+            password=u'!',
+            is_active=False)
     admin_user.groups.append(admin)
     session.add(admin_user)
-    logger.info('Initial group and user created')
+
+    log.info("Initial group and user created.")
 
 def upgrade(session):
     """Upgrade this package's schema to the latest version."""
@@ -166,5 +168,5 @@ def upgrade(session):
     Base.metadata.create_all(session.bind)
     manager = _get_evolution_manager(session)
     repoze.evolution.evolve_to_latest(manager)
-    logger.info('Evolved database to correct incarnation')
+    log.info('Evolved database to correct incarnation')
 

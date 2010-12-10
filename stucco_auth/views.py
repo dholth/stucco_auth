@@ -7,7 +7,7 @@ from pyramid.url import model_url
 from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
 from stucco_auth import tables
-from stucco_auth.models import AuthRoot
+from stucco_auth.interfaces import IAuthRoot
 
 import datetime
 
@@ -19,7 +19,7 @@ def get_dbsession(request):
 
 @view_config(name='login',
              renderer='login.html',
-             context=AuthRoot,
+             context=IAuthRoot,
              permission='view')
 def login(request, username=None):
     logged_in = bool(username or security.authenticated_userid(request))
@@ -75,7 +75,7 @@ def login(request, username=None):
 
 @view_config(name='sign-up',
              renderer='sign-up.html',
-             context=AuthRoot,
+             context=IAuthRoot,
              permission='sign-up')
 def signup(request):
     if not request.registry.settings.get('stucco_auth.allow_signup'):
@@ -120,7 +120,7 @@ def view_model(request):
     return {}
 
 @view_config(name='logout',
-             context=AuthRoot)
+             context=IAuthRoot)
 def logout(request):
     came_from = request.params.get('came_from',
                                    model_url(request.root, request))

@@ -8,9 +8,10 @@ session. The Beaker session, if used, is always called
 """
 
 import copy
-
+from zope.interface import implements
 from pyramid.security import Allow, Everyone, DENY_ALL
 
+from stucco_auth.interfaces import IAuthRoot
 from stucco_auth.tables import User, PasswordReset
 
 class Locatable(object):
@@ -86,17 +87,9 @@ class ForgotPassword(Locatable, KeyTraverser):
         Locatable.__init__(self, name=name, parent=parent)
         KeyTraverser.__init__(self, session=session)
 
-class DictTraverser(Locatable):
-    traverse = None
+class AuthRoot(dict, Locatable):
+    implements(IAuthRoot)
 
-    def __init__(self, name=None, parent=None):
-        Locatable.__init__(self, name=name, parent=parent)
-        self.traverse = {}
-
-    def __getitem__(self, key):
-        return self.traverse[key]
-
-class AuthRoot(DictTraverser):
     __acl__ = [
             (Allow, Everyone, 'view'),
             (Allow, Everyone, 'sign-up'),
@@ -105,25 +98,28 @@ class AuthRoot(DictTraverser):
         """
         :param session: SQLAlchemy session
         """
-        super(AuthRoot, self).__init__(name=name, parent=parent)
+        Locatable.__init__(self, name=name, parent=parent) # super() is not allowed in my code -- daniel
+        self.traverse = self # bw compat
         self.traverse['passwordreset'] = ForgotPassword(parent=parent, session=session)
         self.traverse['users'] = Users(parent=parent, session=session)
 
-class DefaultRoot(DictTraverser):
+class DefaultRoot(dict):
+    implements(IAuthRoot)
+
     __acl__ = [(Allow, Everyone, 'view')]
 
     def __init__(self, name=None, parent=None, session=None):
         """
         :param session: SQLAlchemy session
         """
-        super(DefaultRoot, self).__init__(name=name, parent=parent)
+        self.traverse = self # bw compat
         self.traverse['auth'] = AuthRoot(name='auth', parent=self,
                                          session=session)
 
 
 def get_root(request):
-    # XXX must explicitly dispose of session at end of request:
     session = None
     if request:
         session = request.db
     return DefaultRoot(name='', parent=None, session=session)
+

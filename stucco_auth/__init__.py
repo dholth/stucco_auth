@@ -71,7 +71,7 @@ def main(global_config=None, **settings):
         session.add(tkt_secret)
 
     authentication_policy = AuthTktAuthenticationPolicy(tkt_secret.value,
-                                                        callback=security.find_groups)
+                                                        callback=security.lookup_groups)
 
     authorization_policy = ACLAuthorizationPolicy()
 

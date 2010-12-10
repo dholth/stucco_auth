@@ -89,8 +89,11 @@ from stucco_auth.models import get_root
 class ModelsTests(unittest.TestCase):
     
     def test_get_root(self):
-        root = get_root(None)
+        class MockRequest:
+            db = 'foo'
+        root = get_root(MockRequest)
         assert root is not None
+        assert root['auth']['users'].session is 'foo'
 
 import stucco_auth.views 
 from pyramid.testing import DummyRequest
@@ -99,12 +102,13 @@ from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
 
 class MockEngine(object):
+    pass
 
-    def has_table(self, t):
-        return True
-
-    def create(self, *args, **kwargs):
-        pass
+    # def has_table(self, t):
+    #     return True
+    #
+    # def create(self, *args, **kwargs):
+    #     pass
 
 class MockDBSession(object):
 
@@ -146,6 +150,7 @@ class ViewsTests(unittest.TestCase):
 
     def setUp(self):
         self.request = DummyRequest()
+        self.request.relative_url = lambda x: x
         self.settings = self.request.registry.settings = {}
         self.db_session = MockDBSession()
         self.db_session.data = []
@@ -211,18 +216,20 @@ class ViewsTests(unittest.TestCase):
         d = stucco_auth.views.logout(self.request)
         self.assertTrue(isinstance(d, HTTPFound))
 
-    def test_find_user(self):
-        d = stucco_auth.security.find_user(self.request)
-        self.assertTrue(d is None)
-        self.assertRaises(NoResultFound,
-                          lambda: stucco_auth.security.find_user(self.request, 'foo'))
+    # def test_find_user(self):
+    #     d = stucco_auth.security.find_user(self.request)
+    #     self.assertTrue(d is None)
+    #     self.assertRaises(NoResultFound,
+    #                       lambda: stucco_auth.security.find_user(self.request, 'foo'))
 
-    def test_find_groups(self):
-        user = stucco_auth.tables.AnonymousUser()
+    def test_lookup_groups(self):
+        user = stucco_auth.tables.User()
         user.groups.append(stucco_auth.tables.Group(name='agroup'))
         self.db_session.data = [user]
-        find_groups = stucco_auth.security.find_groups
-        assert 'group:agroup' in find_groups(user, self.request)
+        assert 'group:agroup' in stucco_auth.security.lookup_groups(user.user_id, self.request)
+
+        self.db_session.data = [None]
+        assert stucco_auth.security.lookup_groups(4, self.request) == []
         # MockDBSession is not this smart. Could use sqlite:///:memory: instead...
         # self.assertEqual([], [x for x in find_groups(None, self.request)])
         # self.assertEqual([], [x for x in find_groups(user, self.request)])

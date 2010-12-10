@@ -2,25 +2,15 @@ from stucco_auth.tables import User
 from stucco_auth.views import get_dbsession
 import pyramid.security
 
-
-class GroupLookupError(Exception):
-    pass
-
-def find_user(request, userinfo=None):
-    if userinfo is not None and isinstance(userinfo, int):
-        return db_session.query(User).get(userinfo)
-
-    userinfo = userinfo or pyramid.security.authenticated_userid(request)
-    if not userinfo:
-        return None
-    db_session = get_dbsession(request)
-    return db_session.query(User).filter_by(username=userinfo).one()
-
-def find_groups(user, request):
-    if not isinstance(user, User):
-        if isinstance(user, (basestring, int)):
-            user = find_user(request, user)
-        if user is None:
-            raise GroupLookupError('Groups lookup not possible, user "%s" does not exist' % str(user))
-
+def lookup_groups(authenticated_userid, request):
+    """Return a list of group identifiers for the authenticated user,
+    or [] if the user was not found.
+    
+    Called by the authentication policy. View code can use
+    pyramid.security.effective_principals(request)"""
+    user = request.db.query(User).get(authenticated_userid)
+    if user is None:
+        return []
     return [str(g) for g in user.groups]
+
+find_groups = lookup_groups # bw compat
