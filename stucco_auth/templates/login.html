@@ -1,35 +1,39 @@
-{% extends "layout.html" %}
+{% extends "form_layout.html" %}
 
-{% block title %}Log-In{% endblock %}
+{% block title %}Log In{% endblock %}
 
 {% block content %}
-<h1>Log-In</h1>
-<fieldset id="login-fields" class="form">
-  <legend>Log-In</legend>
+<h1>Log In</h1>
 
-  {% if status %}
-    <div class="status {{status_type}}">{{status}}</div>
-  {% endif %}
+{% if status %}
+<div class="status {{status_type}}">{{status}}</div>
+{% endif %}
 
-  <form action="{{request.relative_url('login')}}"
-        method="POST">
-    <div class="fields">
-      <div class="field">
-        <label for="username">Username:</label>
-        <input type="text" name="username" value="{{username}}" {% if not form_enabled %}disabled{% endif %}/>
-      </div>
-      <div class="field">
-        <label for="password">Password:</label>
-        <input type="password" name="password" {% if not form_enabled %}disabled{% endif %}/>
-      </div>
-      <div class="clear"><!-- --></div>
+{% if logged_in %}
+<div class="login-action logout">You are already logged in. <a href="{{request.relative_url('logout')}}">Log out.</a></div>
+{% else %}
+<form class="uniForm login" action="{{request.url}}" method="POST">
+  <fieldset class="inlineLabels">
+    <legend>Halt and be identified.</legend>
+    <div class="ctrlHolder">
+      <label for="username">Username</label>
+      <input type="text" name="username" class="textInput" value="{{username}}" />
+      <p class="formHint">May contain only letters, numbers, or one of @, _, .</p>
     </div>
-    <input type="submit" value="Log-In" name="form.submitted" {% if not form_enabled %}disabled{% endif %}/>
-    <div class="clear"><!-- --></div>
-  </form>
-  {{ signup_link }}
-{% if allow_password_reset %}<div class="login-action password-reset">Can't remember your password? <a href="{{request.relative_url('password-reset')}}">Click here to reset.</a></div>{% endif %}
-{% if logged_in %}<div class="login-action logout"><a href="{{request.relative_url('logout')}}">Click here to log out.</a></div>{% endif %}
-</fieldset>
-</fieldset>
+    <div class="ctrlHolder">
+      <label for="password">Password</label>
+      <input type="password" class="textInput" name="password" />
+    </div>
+  </fieldset>
+  <div class="buttonHolder">
+    <input class="primaryAction" type="submit" value="Log-In" name="form.submitted" />
+  </div>
+  <div class="ctrlHolder">
+    {{ signup_link }}
+    {{ password_reset_link }}
+  </div>
+</form>
+
+{% endif %}
+
 {% endblock %}

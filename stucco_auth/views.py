@@ -2,6 +2,7 @@ from jinja2 import Markup, escape
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
 from pyramid import security
+from pyramid.security import view_execution_permitted
 from pyramid.url import model_url
 from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
@@ -48,11 +49,17 @@ def login(request, username=None):
             pass
 
     signup_link = u''
-    if security.view_execution_permitted(request.context, request, name='sign-up'):
+    if view_execution_permitted(request.context, request, name='sign-up'):
         signup_link = Markup(
-        """<div class="login-action signup">Don't have a user account?
-        <a href="%s">Sign up here</a></div>""" % 
+        """<div class="login-action signup"><a href="%s">Sign up for a new account.</a></div>""" % 
         escape(request.relative_url('sign-up'))
+        )
+
+    if view_execution_permitted(request.context, request, name='passsword-reset'):
+        # I often wonder if this isn't the primary login mechanism:
+        password_reset_link = Markup(
+        """<div class="login-action password-reset"><a href="%s">Forgot password?</a></div>""" %
+        escape(request.relative_url('password-reset'))
         )
 
     return {
@@ -62,7 +69,7 @@ def login(request, username=None):
         'logged_in': False,
         'username': request.params.get('username', u''),
         'signup_link':signup_link,
-        'allow_password_reset': request.registry.settings.get('stucco_auth.allow_password_reset') or False,
+        'password_reset_link':password_reset_link,
         }
 
 
