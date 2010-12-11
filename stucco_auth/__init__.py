@@ -16,7 +16,7 @@ from stucco_auth import security
 from stucco_auth.tm import TM
 
 import logging
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 def assign_request_db(event):
     event.request.db = event.request.environ['sqlalchemy.session']
@@ -66,7 +66,7 @@ def main(global_config=None, **settings):
     if tkt_secret is None:
         tkt_secret = tables.Settings(key='auth_tkt_secret', 
                 value=os.urandom(20).encode('hex'))
-        logger.debug("New auth_tkt secret: %s", tkt_secret.value)
+        log.info("New auth_tkt secret: %s", tkt_secret.value)
         session.add(tkt_secret)
 
     authentication_policy = AuthTktAuthenticationPolicy(tkt_secret.value,
