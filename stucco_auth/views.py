@@ -110,7 +110,6 @@ def signup(request):
         'username': request.params.get('username', u'')
         }
 
-
 def view_plural(request):
     """Generic view for a simple collection."""
     return {'items':list(request.context)}
@@ -118,6 +117,31 @@ def view_plural(request):
 def view_model(request):
     """Do-nothing view. Template will reference request.context"""
     return {}
+
+import colander
+import deform
+
+from pkg_resources import resource_filename
+deform_template_dir = resource_filename('stucco_auth', 'templates/deform/')
+deform.Form.set_zpt_renderer(
+        deform_template_dir
+        )
+
+class Schema(colander.Schema):
+    text = colander.SchemaNode(
+            colander.String,
+            description='Enter some text')
+
+    text2 = colander.SchemaNode(
+            colander.String,
+            description='Enter some more text')
+
+schema = Schema()
+
+def view_form(request):
+    """Test deform."""
+    form = deform.Form(schema, buttons=('submit',))
+    return dict(form=form.render({}))
 
 @view_config(name='logout',
              context=IAuthRoot)
