@@ -103,7 +103,7 @@ class AuthRoot(dict, Locatable):
         self.traverse['passwordreset'] = ForgotPassword(parent=parent, session=session)
         self.traverse['users'] = Users(parent=parent, session=session)
 
-class DefaultRoot(dict):
+class DefaultRoot(dict, Locatable):
     implements(IAuthRoot)
 
     __acl__ = [(Allow, Everyone, 'view')]
@@ -112,6 +112,7 @@ class DefaultRoot(dict):
         """
         :param session: SQLAlchemy session
         """
+        Locatable.__init__(self, name=name, parent=parent)
         self.traverse = self # bw compat
         self.traverse['auth'] = AuthRoot(name='auth', parent=self,
                                          session=session)
