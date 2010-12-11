@@ -52,7 +52,7 @@ def test_tm_1():
         assert not hasattr(session[0], 'committed')
 
 def test_tm_2():
-    session, session_factory = build_mocks()
+    session = build_mocks()[0]
 
     def app(environ, start_response):
         assert stucco_auth.tm.SESSION_KEY in environ

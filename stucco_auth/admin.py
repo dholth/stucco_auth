@@ -15,7 +15,7 @@ from webob.exc import HTTPSeeOther
 import datetime
 import formish
 import schemaish
-import sqlalchemy
+import sqlalchemy.orm
 import uuid
 import validatish
 
@@ -44,7 +44,7 @@ def get_user(request):
 
 def StrongPassword(password):
     if len(password) < 5: # XXX a better implementation is in cracklib
-        raise validatish.Invalid(u"Bad password: %s" % error)
+        raise validatish.Invalid(u"Password must be at least 5 characters long.")
 
 def OptionalStrongPassword(password):
     """Check password if it is not None"""
@@ -204,7 +204,8 @@ class PasswordResetFormController(object):
 
     def form_widgets(self, form_fields):
         widgets = {}
-        for name, field in form_fields:
+        for items in form_fields:
+            name = items[0]
             widgets[name] = formish.Input(readonly=True)
         widgets['password'] = formish.CheckedPassword()
         return widgets

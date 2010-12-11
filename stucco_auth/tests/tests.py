@@ -1,9 +1,7 @@
 import unittest
 
-import stucco_auth.tables
 from stucco_auth.tables import Group
 
-import sqlalchemy
 import sqlalchemy.orm
 
 

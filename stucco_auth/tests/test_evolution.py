@@ -1,5 +1,5 @@
 """Verify schema versioning is setup correctly."""
-import sqlalchemy
+
 import sqlalchemy.orm
 
 def test_evolution():

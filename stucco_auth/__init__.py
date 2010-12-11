@@ -24,7 +24,6 @@ def assign_request_db(event):
 TEMPLATE_DIRS = ['stucco_auth:templates']
 
 def init_settings(settings):
-    from stucco_auth import tables, security
     from stucco_auth.models import get_root
 
     settings.setdefault('stucco_auth.allow_signup', False)
@@ -71,7 +70,7 @@ def main(global_config=None, **settings):
         session.add(tkt_secret)
 
     authentication_policy = AuthTktAuthenticationPolicy(tkt_secret.value,
-                                                        callback=security.lookup_groups)
+                                                callback=security.lookup_groups)
 
     authorization_policy = ACLAuthorizationPolicy()
 

@@ -8,6 +8,7 @@ session. The Beaker session, if used, is always called
 """
 
 import copy
+import warnings
 from zope.interface import implements
 from pyramid.security import Allow, Everyone, DENY_ALL
 
@@ -120,7 +121,17 @@ class DefaultRoot(dict, Locatable):
 
 def get_root(request):
     session = None
-    if request:
+    try:
         session = request.db
+    except AttributeError:
+        # For proper transaction and session lifecycle management, the 
+        # SQLAlchemy session should be created in middleware and assigned to 
+        # request.db in a callback or a custom request factory.
+        warnings.warn(
+            "get_root() created SQLAlchemy.session"
+            " (only o.k. for scripting i.e. pshell)",
+            RuntimeWarning)
+        session = request.registry.settings['stucco_auth.db_session_factory']()
+        request.db = session
     return DefaultRoot(name='', parent=None, session=session)
 

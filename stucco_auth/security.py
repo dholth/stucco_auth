@@ -1,6 +1,4 @@
 from stucco_auth.tables import User
-from stucco_auth.views import get_dbsession
-import pyramid.security
 
 def lookup_groups(authenticated_userid, request):
     """Return a list of group identifiers for the authenticated user,
