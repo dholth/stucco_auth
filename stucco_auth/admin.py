@@ -374,4 +374,3 @@ class CreateUserFormController(EditUserFormController):
                 str(user.user_id))
 
         return HTTPSeeOther(location=new_user_location)
-

@@ -1,3 +1,4 @@
+import sqlalchemy.orm.exc
 from stucco_auth.tables import User
 
 def lookup_groups(authenticated_userid, request):
@@ -12,3 +13,17 @@ def lookup_groups(authenticated_userid, request):
     return [str(g) for g in user.groups]
 
 find_groups = lookup_groups # bw compat
+
+def authenticate(session, username, password):
+    """Return User() or None if username not found / invalid password.
+    
+    :param session: SQLAlchemy session."""
+    try:
+        u = session.query(User).filter(User.username==username).one()
+        if u.check_password(password):
+            u.last_login = sqlalchemy.func.current_timestamp()
+            return u
+    except sqlalchemy.orm.exc.NoResultFound:
+        pass
+    return None
+

@@ -3,6 +3,7 @@ import unittest
 from stucco_auth.tables import Group
 
 import sqlalchemy.orm
+from cherrypy._cperror import HTTPRedirect
 
 
 class TableTests(unittest.TestCase):
@@ -118,7 +119,10 @@ class MockDBSession(object):
 
     def query(self, s):
         return self
-
+    
+    def filter(self, *args):
+        return self
+    
     def filter_by(self, **kwargs):
         return self
 
@@ -149,12 +153,17 @@ class MockDBSession(object):
 class ViewsTests(unittest.TestCase):
 
     def setUp(self):
+        class DummySession(dict):
+            def save(self): pass
+            invalidate = delete = save
+        
         self.request = DummyRequest()
         self.request.relative_url = lambda x: x
         self.settings = self.request.registry.settings = {}
         self.db_session = MockDBSession()
         self.db_session.data = []
         self.request.db = self.db_session
+        self.request.session = DummySession()
         self.settings['stucco_auth.db_session_factory'] = \
             lambda db_session=self.db_session: db_session
 
@@ -168,25 +177,25 @@ class ViewsTests(unittest.TestCase):
     def test_login(self):
         d = stucco_auth.views.login(self.request)
         self.assertEqual(d['status_type'], u'')
-        d = stucco_auth.views.login(self.request, username='foo')
-        self.assertEqual(d['status_type'], u'info')
 
     def test_post_login(self):
         self.request.method = 'POST'
         self.request.params['form.submitted'] = True
         self.request.params['username'] = 'user1'
         self.request.params['password'] = 'user1'
-
-        d = stucco_auth.views.login(self.request)
-        self.assertEqual(d['status_type'], u'error')
+        self.request.referrer = 'http://www.example.org/'
+        
+        # no more status_type, just a redirect (always)
+        # d = stucco_auth.views.login_post(self.request)
+        # self.assertEqual(d['status_type'], u'error')
 
         class User(stucco_auth.tables.AnonymousUser):
             def check_password(self, p):
                 return True
 
         self.db_session.add(User())
-        d = stucco_auth.views.login(self.request)
-        self.assertTrue(isinstance(d, HTTPFound))
+        d = stucco_auth.views.login_post(self.request)
+        self.assertTrue(isinstance(d, HTTPFound), type(d))
 
     def test_signup(self):
         # by default signup is disabled
@@ -203,6 +212,7 @@ class ViewsTests(unittest.TestCase):
         self.request.params['username'] = 'user1'
         self.request.params['password'] = 'user1'
         self.request.params['firstname'] = 'foo'
+        self.request.referrer = 'http://example.org/'
 
         # should successfully sign up and add a new user
         d = stucco_auth.views.signup(self.request)
@@ -235,3 +245,16 @@ class ViewsTests(unittest.TestCase):
         # self.assertEqual([], [x for x in find_groups(user, self.request)])
         # self.assertRaises(NoResultFound,
         #                   lambda: self.assertEqual([], [x for x in find_groups('foo', self.request)]))
+        
+    def test_authenticate(self):
+        import stucco_auth.security
+        import stucco_auth.tables
+        # Very accurate mock session:
+        Session = sqlalchemy.orm.sessionmaker(
+            sqlalchemy.create_engine('sqlite:///:memory:')
+            )
+        session = Session()
+        stucco_auth.tables.Base.metadata.create_all(session.bind)
+        user = stucco_auth.security.authenticate(session, 'foo', 'bar')
+        assert user is None, user
+        

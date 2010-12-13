@@ -33,7 +33,8 @@
      for=".models.ForgotPassword"
      renderer="forgotpassword.html"
      controller=".admin.ForgotPasswordFormController"
-     form_id="forgotpassword">
+     form_id="forgotpassword"
+     permission="view">
      <formish:action 
        name="submit" 
        title="Submit" />
@@ -43,7 +44,8 @@
      for=".tables.PasswordReset"
      renderer="passwordreset.html"
      controller=".admin.PasswordResetFormController"
-     form_id="passwordreset">
+     form_id="passwordreset"
+     permission="view">
      <formish:action 
        name="submit" 
        title="Submit" />

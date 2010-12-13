@@ -1,7 +1,6 @@
 """
 Traversal models.
 
-
 In this package, 'session' or 'self.session' is always a SQLAlchemy
 session. The Beaker session, if used, is always called
 'request.session'. Apologies.
@@ -93,7 +92,6 @@ class AuthRoot(dict, Locatable):
 
     __acl__ = [
             (Allow, Everyone, 'view'),
-            (Allow, Everyone, 'sign-up'),
             ]
     def __init__(self, name=None, parent=None, session=None):
         """

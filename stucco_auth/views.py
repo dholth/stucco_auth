@@ -1,13 +1,17 @@
 from jinja2 import Markup, escape
 from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
-from pyramid import security
 from pyramid.security import view_execution_permitted
+from pyramid.security import authenticated_userid
+from pyramid.security import remember, forget
 from pyramid.url import model_url
 from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
+
 from stucco_auth import tables
+from stucco_auth.util import get_flash, set_flash
 from stucco_auth.interfaces import IAuthRoot
+from stucco_auth.security import authenticate
 
 import datetime
 
@@ -15,14 +19,15 @@ import logging
 log = logging.getLogger(__name__)
 
 def get_dbsession(request):
+    """Return SQLAlchemy session for request."""
     return request.db
 
 @view_config(name='login',
              renderer='login.html',
              context=IAuthRoot,
              permission='view')
-def login(request, username=None):
-    logged_in = bool(username or security.authenticated_userid(request))
+def login(request):
+    logged_in = authenticated_userid(request) is not None
 
     if logged_in:
         return {'logged_in': True,
@@ -31,35 +36,22 @@ def login(request, username=None):
                 'status_type': u'info'}
 
     status = u''
-    status_type = u''
-    if request.method == 'POST' and 'form.submitted' in request.params:
-        status_type = u'error'
-        status = u'Invalid username and/or password'
-        dbsession = get_dbsession(request)
-        try:
-            username = request.params['username']
-            user = dbsession.query(tables.User).filter_by(username=username).one()
-            if user.check_password(request.params['password']):
-                came_from = request.params.get('came_from',
-                                               model_url(request.root, request))
-                return HTTPFound(location=came_from,
-                                 headers=security.remember(request, user.user_id))
-        except NoResultFound:
-            # just use above error msg
-            pass
-
+    status_type = u''    
     signup_link = u''
-    if view_execution_permitted(request.context, request, name='sign-up'):
+    password_reset_link = u''
+    if view_execution_permitted(request.context, request, name='signup'):
+        # true even if the view does not exist. Lookup IView for context,
+        # request?, name as well...
         signup_link = Markup(
         """<div class="login-action signup"><a href="%s">Sign up for a new account.</a></div>""" % 
-        escape(request.relative_url('sign-up'))
+        escape(request.relative_url('signup'))
         )
 
-    if view_execution_permitted(request.context, request, name='passsword-reset'):
+    if view_execution_permitted(request.context, request, name='passswordreset'):
         # I often wonder if this isn't the primary login mechanism:
         password_reset_link = Markup(
-        """<div class="login-action password-reset"><a href="%s">Forgot password?</a></div>""" %
-        escape(request.relative_url('password-reset'))
+        """<div class="login-action passwordreset"><a href="%s">Forgot password?</a></div>""" %
+        escape(request.relative_url('passwordreset'))
         )
 
     return {
@@ -71,7 +63,54 @@ def login(request, username=None):
         'signup_link':signup_link,
         'password_reset_link':password_reset_link,
         }
+    
+@view_config(name='login',
+             context=IAuthRoot,
+             permission='view',
+             request_method='POST')
+def login_post(request):
+    context = request.context    
+    login_url = model_url(context, request, 'login')
+    came_from = request.params.get('came_from', request.referrer)
+    if not came_from or came_from == login_url:
+        # never use the login form itself as came_from
+        came_from = request.application_url + '/'
+        
+    if request.method != 'POST':
+        return HTTPFound(location=came_from)
 
+    message = ''
+    login = ''
+    password = ''
+    headers = []
+
+    if 'form.submitted' in request.params:
+        login = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request.db, login, password)
+        if user and user.is_active:
+            request.session.invalidate()
+            headers = remember(request, user.user_id)                            
+        elif user and not user.is_active:
+            message = u'Failed login. That account is not active.'
+        else:
+            message = u'Failed login. ' + \
+                Markup(u"<a href='%s'>Forgot password?</a>" 
+                       % escape(model_url(context, request, 'passwordreset')))
+
+    if message:
+        set_flash(request, message)
+
+    return HTTPFound(location=came_from, headers=headers)       
+
+@view_config(name='logout',
+             context=IAuthRoot)
+def logout(request):
+    request.session.delete()
+    came_from = request.params.get('came_from',
+                                   model_url(request.root, request))
+    return HTTPFound(location=came_from,
+                     headers=forget(request))
 
 @view_config(name='sign-up',
              renderer='sign-up.html',
@@ -84,8 +123,8 @@ def signup(request):
     status = u''
     status_type = u''
     if request.method == 'POST' and 'form.submitted' in request.params:
-        dbsession = get_dbsession(request)
-        user_count = dbsession.query(tables.User).filter_by(username=request.params['username']).count()
+        user_count = request.db.query(tables.User)\
+            .filter_by(username=request.params['username']).count()
         status_type = u'error'
         if user_count > 0:
             status = u'Username already taken'
@@ -100,7 +139,7 @@ def signup(request):
                 if f in request.params:
                     setattr(user, f, request.params[f])
             user.set_password(request.params['password'])
-            dbsession.add(user)
+            request.db.add(user)
             status = u'Account created'
             status_type = u'info'
 
@@ -118,35 +157,3 @@ def view_model(request):
     """Do-nothing view. Template will reference request.context"""
     return {}
 
-import colander
-import deform
-
-from pkg_resources import resource_filename
-deform_template_dir = resource_filename('stucco_auth', 'templates/deform/')
-deform.Form.set_zpt_renderer(
-        deform_template_dir
-        )
-
-class Schema(colander.Schema):
-    text = colander.SchemaNode(
-            colander.String,
-            description='Enter some text')
-
-    text2 = colander.SchemaNode(
-            colander.String,
-            description='Enter some more text')
-
-schema = Schema()
-
-def view_form(request):
-    """Test deform."""
-    form = deform.Form(schema, buttons=('submit',))
-    return dict(form=form.render({}))
-
-@view_config(name='logout',
-             context=IAuthRoot)
-def logout(request):
-    came_from = request.params.get('came_from',
-                                   model_url(request.root, request))
-    return HTTPFound(location=came_from,
-                     headers=security.forget(request))
