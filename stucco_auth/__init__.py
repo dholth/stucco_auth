@@ -3,16 +3,17 @@ from sqlalchemy import orm
 import os
 import sqlalchemy
 
-from stucco_auth import views, tables
-from pyramid.authentication import AuthTktAuthenticationPolicy
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.configuration import Configurator
-from pyramid.events import NewRequest
-
 import pyramid_formish
 import pyramid_jinja2
 
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.configuration import Configurator
+from pyramid.events import NewRequest, BeforeRender
+
+from stucco_auth import util
 from stucco_auth import security
+from stucco_auth import views, tables
 from stucco_auth.tm import TM
 
 import logging
@@ -20,6 +21,11 @@ log = logging.getLogger(__name__)
 
 def assign_request_db(event):
     event.request.db = event.request.environ['sqlalchemy.session']
+
+def add_get_flash(event):
+    """Make get_flash available to the renderer when set as a
+    pyramid.events.BeforeRender subscriber."""
+    event['get_flash'] = util.get_flash
 
 TEMPLATE_DIRS = ['stucco_auth:templates']
 
@@ -82,6 +88,9 @@ def main(global_config=None, **settings):
 
     # event handler will only work if stucco_auth.tm is being used
     config.add_subscriber(assign_request_db, NewRequest)
+    
+    config.add_subscriber(add_get_flash, BeforeRender)
+
     app = config.make_wsgi_app()
     tm = TM(app, settings['stucco_auth.db_session_factory'])
 
