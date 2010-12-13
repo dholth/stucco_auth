@@ -9,10 +9,9 @@
 {% block js %}{% endblock %}
 </head>
 <body>
-{% set flash = get_flash(request) %}
-{% if flash: %}
+{% if len(flasher) > 0 %}
 <ul id="flash">
-{% for message in flash: %}
+{% for message in flasher.pop_iter() %}
 <li>{{ message }}</li>
 {% endfor %}
 </ul>

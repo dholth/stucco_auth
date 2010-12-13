@@ -9,9 +9,10 @@ from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
 
 from stucco_auth import tables
-from stucco_auth.util import get_flash, set_flash
 from stucco_auth.interfaces import IAuthRoot
 from stucco_auth.security import authenticate
+
+from stucco_auth.util import Flasher
 
 import datetime
 
@@ -99,7 +100,7 @@ def login_post(request):
                        % escape(model_url(context, request, 'passwordreset')))
 
     if message:
-        set_flash(request, message)
+        Flasher(request).add(message)
 
     return HTTPFound(location=came_from, headers=headers)       
 

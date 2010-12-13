@@ -22,10 +22,10 @@ log = logging.getLogger(__name__)
 def assign_request_db(event):
     event.request.db = event.request.environ['sqlalchemy.session']
 
-def add_get_flash(event):
-    """Make get_flash available to the renderer when set as a
+def add_flasher(event):
+    """Make flasher available to the renderer when set as a
     pyramid.events.BeforeRender subscriber."""
-    event['get_flash'] = util.get_flash
+    event['flasher'] = util.Flasher(event['request'])
 
 TEMPLATE_DIRS = ['stucco_auth:templates']
 
@@ -89,7 +89,7 @@ def main(global_config=None, **settings):
     # event handler will only work if stucco_auth.tm is being used
     config.add_subscriber(assign_request_db, NewRequest)
     
-    config.add_subscriber(add_get_flash, BeforeRender)
+    config.add_subscriber(add_flasher, BeforeRender)
 
     app = config.make_wsgi_app()
     tm = TM(app, settings['stucco_auth.db_session_factory'])

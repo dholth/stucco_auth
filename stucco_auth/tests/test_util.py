@@ -1,4 +1,4 @@
-from stucco_auth.util import get_flash, set_flash
+from stucco_auth.util import Flasher
 
 def test_flash():
     class MockRequest(object): pass
@@ -7,9 +7,9 @@ def test_flash():
         invalidate = delete = save
     MockRequest.session = DummySession()
     request = MockRequest()
-    assert get_flash(request) == []        
-    set_flash(request, 'Flash!')    
-    set_flash(request, 'Gordon!')
-    assert get_flash(request) == ['Flash!', 'Gordon!']
-    assert get_flash(request) == []
-    
+    flasher = Flasher(request)
+    assert flasher.messages == []        
+    flasher.add('Flash!')
+    flasher.add('Gordon!')
+    assert [x for x in flasher.pop_iter()] == ['Flash!', 'Gordon!']
+    assert flasher.messages == []
