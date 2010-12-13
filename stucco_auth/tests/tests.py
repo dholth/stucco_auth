@@ -3,7 +3,6 @@ import unittest
 from stucco_auth.tables import Group
 
 import sqlalchemy.orm
-from cherrypy._cperror import HTTPRedirect
 
 
 class TableTests(unittest.TestCase):
