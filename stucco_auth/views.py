@@ -91,18 +91,18 @@ def login_post(request):
         user = authenticate(request.db, login, password)
         if user and user.is_active:
             request.session.invalidate()
-            headers = remember(request, user.user_id)                            
+            headers = remember(request, user.username)
         elif user and not user.is_active:
             message = u'Failed login. That account is not active.'
         else:
             message = u'Failed login. ' + \
-                Markup(u"<a href='%s'>Forgot password?</a>" 
+                Markup(u"<a href='%s'>Forgot password?</a>"
                        % escape(model_url(context, request, 'passwordreset')))
 
     if message:
         Flasher(request).add(message)
 
-    return HTTPFound(location=came_from, headers=headers)       
+    return HTTPFound(location=came_from, headers=headers)
 
 @view_config(name='logout',
              context=IAuthRoot)
