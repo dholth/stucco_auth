@@ -12,7 +12,7 @@
 {% if logged_in %}
 <div class="login-action logout">You are already logged in. <a href="{{request.relative_url('logout')}}">Log out.</a></div>
 {% else %}
-<form class="uniForm login" action="{{request.url}}" method="POST">
+<form class="uniForm login" action="{{request.relative_url('login')}}" method="POST">
   <fieldset class="inlineLabels">
     <legend>Halt and be identified.</legend>
     <div class="ctrlHolder">
@@ -26,6 +26,7 @@
     </div>
   </fieldset>
   <div class="buttonHolder">
+    <input type="hidden" name="came_from" value="{{request.params.get('came_from', '')}}" />
     <input class="primaryAction" type="submit" value="Log-In" name="form.submitted" />
   </div>
   <div class="ctrlHolder">
