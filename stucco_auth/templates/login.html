@@ -12,7 +12,7 @@
 {% if logged_in %}
 <div class="login-action logout">You are already logged in. <a href="{{request.relative_url('logout')}}">Log out.</a></div>
 {% else %}
-<form class="uniForm login" action="{{request.relative_url('login')}}" method="POST">
+<form class="uniForm login" action="{{request.url}}" method="POST">
   <fieldset class="inlineLabels">
     <legend>Halt and be identified.</legend>
     <div class="ctrlHolder">
