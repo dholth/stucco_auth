@@ -91,7 +91,7 @@ def login_post(request):
         user = authenticate(request.db, login, password)
         if user and user.is_active:
             request.session.invalidate()
-            headers = remember(request, user.username)
+            headers = remember(request, user.user_id)
         elif user and not user.is_active:
             message = u'Failed login. That account is not active.'
         else:
