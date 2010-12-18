@@ -32,14 +32,23 @@ TEMPLATE_DIRS = ['stucco_auth:templates']
 def init_settings(settings):
     from stucco_auth.models import get_root
 
-    settings.setdefault('stucco_auth.allow_signup', False)
-    settings.setdefault('stucco_auth.allow_password_reset', False) # not implemented yet
-    settings.setdefault('jinja2.directories', '\n'.join(TEMPLATE_DIRS))
-    settings.setdefault('stucco_auth.db_connect_string', 'sqlite:///stucco_auth.db')
-    settings.setdefault('stucco_auth.db_engine',
-                        sqlalchemy.create_engine(settings['stucco_auth.db_connect_string']))
-    settings.setdefault('stucco_auth.db_session_factory',
-                        orm.sessionmaker(bind=settings['stucco_auth.db_engine']))
+    defaults = {
+        'stucco_auth.allow_signup': False,
+        'stucco_auth.allow_password_reset': False, # not implemented yet
+        'jinja2.directories': '\n'.join(TEMPLATE_DIRS),
+        'stucco_auth.db_connect_string': 'sqlite:///stucco_auth.db',                
+    }
+
+    defaults.update(settings) # overwrite defaults with values from settings
+    settings.update(defaults) # merge defaults into settings
+
+    if not 'stucco_auth.db_engine' in settings:
+        settings['stucco_auth.db_engine'] = \
+            sqlalchemy.create_engine(settings['stucco_auth.db_connect_string'])
+
+    if not 'stucco_auth.db_session_factory' in settings:
+        settings['stucco_auth.db_session_factory'] = \
+            orm.sessionmaker(bind=settings['stucco_auth.db_engine'])
 
 def init_config(config, settings):
     config.load_zcml('stucco_auth:configure.zcml')
