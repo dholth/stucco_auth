@@ -20,16 +20,10 @@ import uuid
 import validatish
 
 from stucco_auth.tables import User, PasswordReset
+from stucco_auth.util import set_flash
 
 import logging
 log = logging.getLogger(__name__)
-
-
-# XXX Originally these utility functions were implemented in other modules.
-# They should probably be moved:
-
-def set_flash(*args, **kw):
-    pass # not implemented
 
 def is_admin(user):
     # XXX implement user.is_admin() instead?

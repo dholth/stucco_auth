@@ -9,7 +9,7 @@
 {% block js %}{% endblock %}
 </head>
 <body>
-{% if len(flasher) > 0 %}
+{% if flasher %}
 <ul id="flash">
 {% for message in flasher.pop_iter() %}
 <li>{{ message }}</li>

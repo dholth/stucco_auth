@@ -13,13 +13,16 @@ class Flasher(object):
 
     def __init__(self, request):
         self.request = request
-
-    @property
-    def messages(self):
-        return self.request.session.get('flash', [])
+        
+    def __bool__(self):
+        return bool(self.messages)
 
     def __len__(self):
         return len(self.messages or [])
+    
+    @property
+    def messages(self):
+        return self.request.session.get('flash', [])
 
     def pop(self):
         msgs = self.messages or []
@@ -38,4 +41,9 @@ class Flasher(object):
 
     def __str__(self):
         return '<Flasher message_count=%i>' % len(self)
+    
     __repr__ = __str__
+    
+def set_flash(request, message):
+    """Append message to the list of flash messages."""
+    Flasher(request).add(message)

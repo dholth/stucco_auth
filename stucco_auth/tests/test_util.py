@@ -8,8 +8,9 @@ def test_flash():
     MockRequest.session = DummySession()
     request = MockRequest()
     flasher = Flasher(request)
-    assert flasher.messages == []        
+    assert flasher.messages == []
+    flasher.add('Gordon!')        
     flasher.add('Flash!')
-    flasher.add('Gordon!')
-    assert [x for x in flasher.pop_iter()] == ['Flash!', 'Gordon!']
+    output = [x.text for x in flasher.pop_iter()]
+    assert output == ['Flash!', 'Gordon!'], output
     assert flasher.messages == []
