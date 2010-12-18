@@ -6,7 +6,6 @@ from pyramid.security import authenticated_userid
 from pyramid.security import remember, forget
 from pyramid.url import model_url
 from pyramid.view import view_config
-from sqlalchemy.orm.exc import NoResultFound
 
 from stucco_auth import tables
 from stucco_auth.interfaces import IAuthRoot
@@ -115,15 +114,16 @@ def logout(request):
 
 @view_config(name='sign-up',
              renderer='sign-up.html',
-             context=IAuthRoot,
-             permission='sign-up')
+             context=IAuthRoot)
 def signup(request):
+    # XXX simply don't add the view if end user does not want the feature
     if not request.registry.settings.get('stucco_auth.allow_signup'):
         raise NotFound()
 
     status = u''
     status_type = u''
     if request.method == 'POST' and 'form.submitted' in request.params:
+        # XXX tie into admin interface 'set initial password e-mail'?
         user_count = request.db.query(tables.User)\
             .filter_by(username=request.params['username']).count()
         status_type = u'error'
