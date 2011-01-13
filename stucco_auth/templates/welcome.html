@@ -2,8 +2,11 @@
 {% block title %}Welcome{% endblock %}
 {% block content %}
 <h1>stucco_auth</h1>
-<p>This is the example application included with stucco_auth.</p>
-<p>TODO: There are no users by default, not even admin. You can add one by using the pyramid shell.</p>
+<p>This is the example application included with stucco_auth. You can log in
+and out. That's all there is to it.</p>
+<p>TODO: There is an admin user by default. Its password is output by
+a log.info() call in create.py if it is building a new database
+(scroll up after running 'paster serve development.ini' the first time).</p>
 <ul>
 <li><a href="{{ request.script_name }}/login">Login</a></li>
 <li><a href="{{ request.script_name }}/logout">Logout</a></li>
