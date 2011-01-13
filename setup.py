@@ -7,18 +7,15 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
-    'colander',
     'cryptacular',
-    'deform',
     'pyramid',
     'pyramid_beaker',
-    'pyramid_formish',
     'pyramid_jinja2',
     'stucco_evolution',
 ]
 
 setup(name='stucco_auth',
-      version='0.0',
+      version='0.1e-6',
       description='stucco_auth',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
@@ -37,7 +34,6 @@ setup(name='stucco_auth',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="stucco_auth.tests",
       entry_points = """\
       [paste.app_factory]
       main = stucco_auth:main

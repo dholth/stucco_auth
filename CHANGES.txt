@@ -1,4 +1,9 @@
+0.1
+---
+
+- Remove everything except the most basic user/groups/login functionality
+
 0.0
 ---
 
--  Initial version
+- Initial version

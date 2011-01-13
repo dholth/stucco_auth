@@ -9,4 +9,3 @@ class IAuthRoot(Interface):
     class MyRoot(object):
         implements(IAuthRoot)
     """
-

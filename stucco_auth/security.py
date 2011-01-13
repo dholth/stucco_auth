@@ -2,17 +2,12 @@ import sqlalchemy.orm.exc
 from stucco_auth.tables import User
 
 def lookup_groups(authenticated_userid, request):
-    """Return a list of group identifiers for the authenticated user,
-    or [] if the user was not found.
+    """Return a list of group identifiers for the current user (or []
+    if no one is logged in)
     
     Called by the authentication policy. View code can use
     pyramid.security.effective_principals(request)"""
-    user = request.db.query(User).get(authenticated_userid)
-    if user is None:
-        return []
-    return [str(g) for g in user.groups]
-
-find_groups = lookup_groups # bw compat
+    return [str(g) for g in request.user.groups]
 
 def authenticate(session, username, password):
     """Return User() or None if username not found / invalid password.

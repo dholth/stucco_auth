@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Welcome{% endblock %}
 {% block content %}
-<h1>Ponzi Auth</h1>
-<p>This is the example application for ponzi_auth.</p>
+<h1>stucco_auth</h1>
+<p>This is the example application included with stucco_auth.</p>
 <ul>
-<li><a href="{{request.path_url.rstrip('/')}}/auth/login">Login</a></li>
-<li><a href="{{request.path_url.rstrip('/')}}/auth/users">Users</a></li>
-<li><a href="{{request.path_url.rstrip('/')}}/auth/passwordreset">Password Reset</a></li>
-<li><a href="{{request.path_url.rstrip('/')}}/auth/sign-up">Sign Up</a></li>
+<li><a href="{{ request.script_name }}/auth/login">Login</a></li>
 </ul>
 {% endblock %}

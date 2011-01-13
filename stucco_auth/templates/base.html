@@ -3,15 +3,16 @@
 <head>
 <title>{% block title %}{% endblock %}</title>
 {% block css %}
-<link rel="stylesheet" type="text/css" href="{{request.scheme}}://yui.yahooapis.com/combo?3.2.0/build/cssreset/reset-min.css&3.2.0/build/cssgrids/grids-min.css&3.2.0/build/cssbase/base-min.css" />
-<link rel="stylesheet" type="text/css" href="{{request.application_url}}/static/stucco_auth.css" />
+<link rel="stylesheet" type="text/css" href="{{ request.scheme }}://yui.yahooapis.com/combo?3.2.0/build/cssreset/reset-min.css&3.2.0/build/cssgrids/grids-min.css&3.2.0/build/cssbase/base-min.css" />
+<link rel="stylesheet" type="text/css" href="{{ request.script_name }}/static/stucco_auth.css" />
 {% endblock %}
 {% block js %}{% endblock %}
 </head>
 <body>
-{% if flasher %}
+{% set flash = request.session.pop_flash() %}
+{% if flash %}
 <ul id="flash">
-{% for message in flasher.pop_iter() %}
+{% for message in flash %}
 <li>{{ message }}</li>
 {% endfor %}
 </ul>
