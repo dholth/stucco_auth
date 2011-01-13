@@ -3,7 +3,9 @@
 {% block content %}
 <h1>stucco_auth</h1>
 <p>This is the example application included with stucco_auth.</p>
+<p>TODO: There are no users by default, not even admin. You can add one by using the pyramid shell.</p>
 <ul>
-<li><a href="{{ request.script_name }}/auth/login">Login</a></li>
+<li><a href="{{ request.script_name }}/login">Login</a></li>
+<li><a href="{{ request.script_name }}/logout">Logout</a></li>
 </ul>
 {% endblock %}
