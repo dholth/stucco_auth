@@ -41,3 +41,4 @@ def make_tm(app, global_conf):
     import sqlalchemy.orm
     Session = sqlalchemy.orm.sessionmaker(global_conf['sqlalchemy.url'])
     return TM(app, Session)
+

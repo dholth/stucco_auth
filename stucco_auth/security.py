@@ -16,12 +16,9 @@ def authenticate(session, username, password):
     """Return User() or None if username not found / invalid password.
     
     :param session: SQLAlchemy session."""
-    try:
-        u = session.query(User).filter(User.username==username).one()
-        if u.check_password(password):
-            u.last_login = sqlalchemy.func.current_timestamp()
-            return u
-    except sqlalchemy.orm.exc.NoResultFound:
-        pass
+    u = session.query(User).filter(User.username==username).first()
+    if u and u.check_password(password):
+        u.last_login = sqlalchemy.func.current_timestamp()
+        return u
     return None
 

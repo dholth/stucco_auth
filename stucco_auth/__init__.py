@@ -17,6 +17,7 @@ from stucco_auth.interfaces import IAuthRoot
 import logging
 log = logging.getLogger(__name__)
 
+TEMPLATE_DIRS = ['stucco_auth:templates']
 
 def new_request_listener(event):
     """Assign request.db as required by stucco_auth views"""
@@ -30,14 +31,12 @@ def new_request_listener(event):
 
 def config(c):
     """Add stucco_auth views to Pyramid configurator instance."""
-    c.add_view(views.login, name='login', context=IAuthRoot, renderer='login.html',
+    c.add_view(views.login, name='login', context=IAuthRoot, renderer='login.jinja2',
         permission='view')
     c.add_view(views.login_post, name='login', context=IAuthRoot, request_method='POST',
         permission='view')
     c.add_view(views.logout, name='logout', context=IAuthRoot)
     c.add_static_view('static', 'stucco_auth:static')
-
-TEMPLATE_DIRS = ['stucco_auth:templates']
 
 
 def init_settings(settings):
@@ -59,7 +58,7 @@ def init_settings(settings):
 
 
 def init_config(config, settings):
-    config.add_renderer('.html', pyramid_jinja2.renderer_factory)
+    config.add_renderer('.jinja2', pyramid_jinja2.renderer_factory)
 
     config.include('stucco_auth.config')
 
@@ -108,7 +107,7 @@ def main(global_config=None, **settings):
                           authorization_policy=authorization_policy)
     init_config(config, settings)
     
-    config.add_view(context=IAuthRoot, renderer='welcome.html')
+    config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
 
     # event handler will only work if stucco_auth.tm is being used
     config.add_subscriber(new_request_listener, NewRequest)
