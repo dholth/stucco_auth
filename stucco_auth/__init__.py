@@ -35,7 +35,7 @@ def config(c):
     c.add_view(views.login_post, name='login', context=IAuthRoot, request_method='POST',
         permission='view')
     c.add_view(views.logout, name='logout', context=IAuthRoot)
-    c.add_static_view('static', 'stucco_auth:static')
+    c.add_static_view('stucco_auth_static', 'stucco_auth:static')
 
 TEMPLATE_DIRS = ['stucco_auth:templates']
 
