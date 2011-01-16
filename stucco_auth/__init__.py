@@ -30,7 +30,7 @@ def new_request_listener(event):
 
 def config(c):
     """Add stucco_auth views to Pyramid configurator instance."""
-    c.add_view(views.login, name='login', context=IAuthRoot, renderer='login.html',
+    c.add_view(views.login, name='login', context=IAuthRoot, renderer='login.jinja2',
         permission='view')
     c.add_view(views.login_post, name='login', context=IAuthRoot, request_method='POST',
         permission='view')
@@ -48,7 +48,7 @@ def init_settings(settings):
     defaults.update(settings)  # overwrite defaults with values from settings
     settings.update(defaults)  # merge defaults into settings
 
-    engine = sqlalchemy.engine_from_config(settings)
+    engine = sqlalchemy.create_engine(settings['sqlalchemy.url'])
     Session = sqlalchemy.orm.sessionmaker(bind=engine)
 
     if not 'stucco_auth.db_engine' in settings:
@@ -59,7 +59,7 @@ def init_settings(settings):
 
 
 def init_config(config, settings):
-    config.add_renderer('.html', pyramid_jinja2.renderer_factory)
+    config.load_zcml('pyramid_jinja2:configure.zcml')
 
     config.include('stucco_auth.config')
 
@@ -108,7 +108,7 @@ def main(global_config=None, **settings):
                           authorization_policy=authorization_policy)
     init_config(config, settings)
     
-    config.add_view(context=IAuthRoot, renderer='welcome.html')
+    config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
 
     # event handler will only work if stucco_auth.tm is being used
     config.add_subscriber(new_request_listener, NewRequest)
