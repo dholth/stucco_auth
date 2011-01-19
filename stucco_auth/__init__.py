@@ -1,5 +1,6 @@
 import os
 import sqlalchemy
+import sqlalchemy.orm
 
 import pyramid_jinja2
 
@@ -7,6 +8,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.events import NewRequest
+from pyramid.interfaces import IAuthenticationPolicy
 
 from stucco_auth import security
 from stucco_auth import tables
@@ -17,45 +19,23 @@ from stucco_auth.interfaces import IAuthRoot
 import logging
 log = logging.getLogger(__name__)
 
-TEMPLATE_DIRS = ['stucco_auth:templates']
-
 def new_request_listener(event):
-    """Assign request.db as required by stucco_auth views"""
-    # XXX 'fetch current session' should be configurable based on what kind of
-    # transaction manager is in use, etc. For a scoped session, this might be
-    # event.request.db = myapp.models.DBSession(), or the session for this
-    # request might have been already instantiated into the wsgi environ by
-    # a custom transaction manager.
-    event.request.db = event.request.environ[SESSION_KEY]
+    """Assign request.db as required by stucco_auth views.
 
+    stucco_auth requires a transaction-managed SQLAlchemy session to be
+    available as request.db. How this will be obtained depends on the
+    kind of session factory and transaction manager that are in use.
+    """
+    event.request.db = event.request.environ[SESSION_KEY]
 
 def config(c):
     """Add stucco_auth views to Pyramid configurator instance."""
-    c.add_view(views.login, name='login', context=IAuthRoot, renderer='login.jinja2',
-        permission='view')
-    c.add_view(views.login_post, name='login', context=IAuthRoot, request_method='POST',
-        permission='view')
+    c.add_view(views.login, name='login', context=IAuthRoot,
+        renderer='login.jinja2')
+    c.add_view(views.login_post, name='login', context=IAuthRoot,
+        request_method='POST')
     c.add_view(views.logout, name='logout', context=IAuthRoot)
     c.add_static_view('static', 'stucco_auth:static')
-
-
-def init_settings(settings):
-    defaults = {
-        'jinja2.directories': '\n'.join(TEMPLATE_DIRS),
-    }
-
-    defaults.update(settings)  # overwrite defaults with values from settings
-    settings.update(defaults)  # merge defaults into settings
-
-    engine = sqlalchemy.engine_from_config(settings)
-    Session = sqlalchemy.orm.sessionmaker(bind=engine)
-
-    if not 'stucco_auth.db_engine' in settings:
-        settings['stucco_auth.db_engine'] = engine
-
-    if not 'stucco_auth.db_session_factory' in settings:
-        settings['stucco_auth.db_session_factory'] = Session
-
 
 def init_config(config, settings):
     config.add_renderer('.jinja2', pyramid_jinja2.renderer_factory)
@@ -67,26 +47,20 @@ def init_config(config, settings):
     session_factory = pyramid_beaker.session_factory_from_settings(settings)
     config.set_session_factory(session_factory)
 
-
 def main(global_config=None, **settings):
-    """Return a Pyramid WSGI application."""    
+    """Return the example application for stucco_auth."""    
     from stucco_auth.models import get_root
 
     if global_config is None:
         global_config = {}
-        
-    settings = dict(settings)
-    init_settings(settings)
-
-    Session = settings['stucco_auth.db_session_factory']
-    session = Session()
+    
+    engine = sqlalchemy.engine_from_config(settings)
+    Session = sqlalchemy.orm.sessionmaker(bind=engine)
 
     import stucco_evolution
     stucco_evolution.initialize(session)
 
-    stucco_evolution.create_or_upgrade_many(
-        stucco_evolution.managers(session,
-            stucco_evolution.dependencies('stucco_auth')))
+    stucco_evolution.create_or_upgrade_packages(session, 'stucco_auth')
 
     # Retrieve stored auth_tkt secret, or make and store a secure new one:
     tkt_secret = session.query(tables.Settings).get('auth_tkt_secret')

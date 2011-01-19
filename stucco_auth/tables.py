@@ -63,7 +63,6 @@ class User(Base):
             secondary = users_groups,
             backref="users")
 
-    @property
     def is_anonymous(self):
         return False
 
@@ -77,10 +76,10 @@ class User(Base):
                                           setter=self.set_password)
 
     def __str__(self):
-        return 'user:%d' % self.user_id
+        # XXX self.user_id is None for new users
+        return 'user:%s' % self.user_id
 
 class AnonymousUser(User):
-    
     username = u'anonymous'
     email = u""
     first_name = u'(not logged in)'
@@ -89,7 +88,6 @@ class AnonymousUser(User):
     user_id = 0
     groups = []
 
-    @property
     def is_anonymous(self):
         return True
 

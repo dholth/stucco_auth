@@ -34,6 +34,7 @@ setup(name='stucco_auth',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
+      test_suite='nose.collector',
       entry_points = """\
       [paste.app_factory]
       main = stucco_auth:main
