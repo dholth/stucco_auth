@@ -37,16 +37,6 @@ def config(c):
     c.add_view(views.logout, name='logout', context=IAuthRoot)
     c.add_static_view('static', 'stucco_auth:static')
 
-def init_config(config, settings):
-    config.add_renderer('.jinja2', pyramid_jinja2.renderer_factory)
-
-    config.include('stucco_auth.config')
-
-    # Configure beaker session:
-    import pyramid_beaker
-    session_factory = pyramid_beaker.session_factory_from_settings(settings)
-    config.set_session_factory(session_factory)
-
 def main(global_config=None, **settings):
     """Return the example application for stucco_auth."""    
     from stucco_auth.models import get_root
@@ -79,8 +69,16 @@ def main(global_config=None, **settings):
                           settings=settings,
                           authentication_policy=authentication_policy,
                           authorization_policy=authorization_policy)
-    init_config(config, settings)
+
+    config.add_renderer('.jinja2', pyramid_jinja2.renderer_factory)
+
+    # Configure beaker session:
+    import pyramid_beaker
+    session_factory = pyramid_beaker.session_factory_from_settings(settings)
+    config.set_session_factory(session_factory)
     
+    config.include('stucco_auth.config')
+
     config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
 
     # event handler will only work if stucco_auth.tm is being used
