@@ -8,14 +8,14 @@ def test_evolution():
 
     import stucco_evolution
     import stucco_auth.tables
+    import stucco_auth.evolve
 
     engine = sqlalchemy.create_engine('sqlite:///:memory:')
     Session = sqlalchemy.orm.sessionmaker(engine)
     session = Session()
 
-    stucco_auth.tables.initialize(session)
-    stucco_auth.tables.initialize(session) # catch 'already created' case
-    stucco_auth.tables.upgrade(session)
+    stucco_evolution.initialize(session)
+    stucco_evolution.create_or_upgrade_packages(session, 'stucco_auth')
 
     versions = {}
     for row in session.query(stucco_evolution.SchemaVersion):
@@ -23,7 +23,7 @@ def test_evolution():
 
     assert 'stucco_evolution' in versions, versions
     assert 'stucco_auth' in versions, versions
-    assert versions['stucco_auth'] == stucco_auth.tables.SCHEMA_VERSION
+    assert versions['stucco_auth'] == stucco_auth.evolve.VERSION
 
     session.commit()
 

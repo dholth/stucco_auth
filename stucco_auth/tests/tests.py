@@ -76,12 +76,6 @@ class TableTests(unittest.TestCase):
 class MockEngine(object):
     pass
 
-    # def has_table(self, t):
-    #     return True
-    #
-    # def create(self, *args, **kwargs):
-    #     pass
-
 class MockDBSession(object):
 
     def __init__(self):
@@ -105,6 +99,9 @@ class MockDBSession(object):
     def get(self, key):
         return self.data[0]
 
+    def first(self):
+        return self.data[0]
+
     def add(self, obj):
         self.data.append(obj)
 
@@ -125,7 +122,10 @@ class ViewsTests(unittest.TestCase):
 
     def setUp(self):
         class DummySession(dict):
+            messages = []
             def save(self): pass
+            def flash(self, message):
+                self.messages.append(message)
             invalidate = delete = save
         
         self.request = DummyRequest()
@@ -178,6 +178,7 @@ class ViewsTests(unittest.TestCase):
             sqlalchemy.create_engine('sqlite:///:memory:')
             )
         session = Session()
+        stucco_evolution.initialize(session)        
         stucco_evolution.manager(session, 'stucco_auth').create()
         user = stucco_auth.security.authenticate(session, 'foo', 'bar')
         assert user is None, user
