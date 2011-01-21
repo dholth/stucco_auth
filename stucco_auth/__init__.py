@@ -8,13 +8,14 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.events import NewRequest
-from pyramid.interfaces import IAuthenticationPolicy
 
 from stucco_auth import security
 from stucco_auth import tables
 from stucco_auth import views
 from stucco_auth.tm import TM, SESSION_KEY
 from stucco_auth.interfaces import IAuthRoot
+
+SESSION_FACTORY_KEY = __name__ + '.db_session_factory'
 
 import logging
 log = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ def main(global_config, **settings):
     
     engine = sqlalchemy.engine_from_config(settings)
     Session = sqlalchemy.orm.sessionmaker(bind=engine)
+    settings[SESSION_FACTORY_KEY] = Session
     
     session = Session()
     try:

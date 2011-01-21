@@ -1,4 +1,3 @@
-from nose.tools import raises
 
 def test_locatable():
     from stucco_auth.models import Locatable

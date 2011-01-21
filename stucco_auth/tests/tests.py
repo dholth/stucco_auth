@@ -1,10 +1,8 @@
 import unittest
 import sqlalchemy.orm
 import stucco_auth.views 
-from pyramid.exceptions import NotFound
 from pyramid.httpexceptions import HTTPFound
 from pyramid.testing import DummyRequest
-from sqlalchemy.orm.exc import NoResultFound
 from stucco_auth.tables import Group
 
 

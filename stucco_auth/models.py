@@ -24,26 +24,9 @@ class DefaultRoot(dict, Locatable):
 
     __acl__ = [(Allow, Everyone, 'view')]
 
-    def __init__(self, name=None, parent=None, db=None):
-        """
-        :param db: SQLAlchemy db
-        """
+    def __init__(self, name=None, parent=None):
         Locatable.__init__(self, name=name, parent=parent)
-        self.db = db
 
 def get_root(request):
-    db = None
-    try:
-        db = request.db
-    except AttributeError:
-        # For proper transaction and db lifecycle management, the 
-        # SQLAlchemy db should be created in middleware and assigned to 
-        # request.db in a callback or a custom request factory.
-        warnings.warn(
-            "get_root() created SQLAlchemy.db"
-            " (only o.k. for scripting i.e. pshell)",
-            RuntimeWarning)
-        db = request.registry.settings['stucco_auth.db_session_factory']()
-        request.db = db
-    return DefaultRoot(name='', parent=None, db=db)
+    return DefaultRoot(name='', parent=None)
 
