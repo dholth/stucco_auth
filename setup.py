@@ -12,6 +12,7 @@ requires = [
     'pyramid_beaker',
     'pyramid_jinja2',
     'stucco_evolution',
+    'SQLAlchemy'
 ]
 
 setup(name='stucco_auth',
@@ -33,7 +34,7 @@ setup(name='stucco_auth',
       include_package_data=True,
       zip_safe=False,
       install_requires=requires,
-      tests_require=requires,
+      tests_require=requires + ['nose'],
       test_suite='nose.collector',
       entry_points = """\
       [paste.app_factory]

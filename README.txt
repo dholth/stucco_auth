@@ -19,6 +19,7 @@ What You Get
 
 What You Don't Get
 ------------------
+
 - Any express or implied warranties, including, without limitation, the
   implied warranties of merchantibility and fitness for a particular purpose.
 
