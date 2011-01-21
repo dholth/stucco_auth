@@ -17,6 +17,11 @@ What You Get
 - YUI 3 CSS in the base template
 - 99% test coverage
 
+What You Don't Get
+------------------
+- Any express or implied warranties, including, without limitation, the
+  implied warranties of merchantibility and fitness for a particular purpose.
+
 Requirements
 ------------
 
@@ -32,6 +37,14 @@ before it will work properly:
 - A configured authentication and authorization policy. Login and logout views
   don't make sense otherwise.
 - A transaction-managed SQLAlchemy session made available as request.db
+- stucco_auth's schema instantiated into that database
 - request.session for flash messages
 - Jinja2 templating
-- 
+- A stucco_auth.interfaces.IAuthRoot instance in the resource tree. login/ and
+  logout/ are resolved relative to this object.
+
+The demo application, stucco_auth.main(), provides one example of how to set
+this up.
+
+If you have any questions, please ask DanielHolth in IRC or on one of the
+Pylons mailing lists.
