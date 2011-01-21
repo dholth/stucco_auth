@@ -30,7 +30,7 @@ class TableTests(unittest.TestCase):
         session.add(user)
         session.flush()
         
-        self.assertEqual(user.is_anonymous(), False)
+        self.assertEqual(user.is_anonymous, False)
         assert str(user).startswith('user:'), 'str(user) must start with user:'
         
         group = Group(name='Galois')
@@ -67,7 +67,7 @@ class TableTests(unittest.TestCase):
 
     def test_anonymous(self):
         user = stucco_auth.tables.AnonymousUser()
-        self.assertTrue(user.is_anonymous())
+        self.assertTrue(user.is_anonymous)
         self.assertFalse(user.check_password('foo'))
 
     def test_view_model(self):
@@ -87,14 +87,6 @@ class MockDBSession(object):
     
     def filter(self, *args):
         return self
-    
-    def filter_by(self, **kwargs):
-        return self
-
-    def one(self):
-        if len(self.data) == 0:
-            raise NoResultFound()
-        return self.data[0]
 
     def get(self, key):
         return self.data[0]
@@ -104,19 +96,6 @@ class MockDBSession(object):
 
     def add(self, obj):
         self.data.append(obj)
-
-    def count(self):
-        return len(self.data)
-
-    def commit(self):
-        pass
-
-    _marker = object()
-    def bind(self, engine=_marker):
-        if engine is not self._marker:
-            self.engine = engine
-        return self.engine
-    bind = property(bind, bind)
 
 class ViewsTests(unittest.TestCase):
 
@@ -138,20 +117,64 @@ class ViewsTests(unittest.TestCase):
         self.settings['stucco_auth.db_session_factory'] = \
             lambda db_session=self.db_session: db_session
 
-    def test_login(self):
+    def test_login_GET(self):
         d = stucco_auth.views.login(self.request)
         self.assertEqual(d['status_type'], u'')
 
-    def test_post_login(self):
+    def test_already_logged_in(self):
+        import pyramid.config
+        c = pyramid.config.Configurator()
+        c.testing_securitypolicy(1)
+        request = DummyRequest()
+        request.registry = c.registry
+        stucco_auth.views.login(request)
+
+    def test_login_POST(self):
         self.request.method = 'POST'
         self.request.params['form.submitted'] = True
         self.request.params['username'] = 'user1'
         self.request.params['password'] = 'user1'
-        self.request.referrer = 'http://www.example.org/'
+        self.request.referrer = ''
 
         class User(stucco_auth.tables.AnonymousUser):
             def check_password(self, p):
                 return True
+            @property
+            def is_active(self):
+                return True
+
+        self.db_session.add(User())
+        d = stucco_auth.views.login_post(self.request)
+        self.assertTrue(isinstance(d, HTTPFound), type(d))
+
+    def test_login_POST1(self):
+        self.request.method = 'POST'
+        self.request.params['form.submitted'] = True
+        self.request.params['username'] = 'user1'
+        self.request.params['password'] = 'user1'
+        self.request.referrer = ''
+
+        class User(stucco_auth.tables.AnonymousUser):
+            def check_password(self, p):
+                return False
+
+        self.db_session.add(User())
+        d = stucco_auth.views.login_post(self.request)
+        self.assertTrue(isinstance(d, HTTPFound), type(d))
+        
+    def test_login_POST2(self):
+        self.request.method = 'POST'
+        self.request.params['form.submitted'] = True
+        self.request.params['username'] = 'user1'
+        self.request.params['password'] = 'user1'
+        self.request.referrer = ''
+
+        class User(stucco_auth.tables.AnonymousUser):
+            def check_password(self, p):
+                return True
+            @property
+            def is_active(self):
+                return False
 
         self.db_session.add(User())
         d = stucco_auth.views.login_post(self.request)

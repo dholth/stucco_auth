@@ -1,7 +1,7 @@
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 from pyramid.security import remember, forget
-from pyramid.url import model_url
+from pyramid.url import resource_url
 
 from stucco_auth.security import authenticate
 
@@ -32,14 +32,11 @@ def login(request):
 def login_post(request):
     """Login view for POST requests."""
     context = request.context    
-    login_url = model_url(context, request, 'login')
+    login_url = resource_url(context, request, 'login')
     next_url = request.params.get('next', request.referrer)
     if not next_url or next_url == login_url:
         # never use the login form itself as next_url
         next_url = request.application_url + '/'
-        
-    if request.method != 'POST':
-        return HTTPFound(location=next_url)
 
     message = ''
     headers = []
@@ -48,13 +45,13 @@ def login_post(request):
         login = request.POST['username']
         password = request.POST['password']
         user = authenticate(request.db, login, password)
-        if user and user.is_active:
+        if not user:
+            message = u'Failed login.'
+        elif user.is_active:
             request.session.invalidate()
             headers = remember(request, user.user_id)
-        elif user and not user.is_active:
-            message = u'Failed login. That account is not active.'
         else:
-            message = u'Failed login.'
+            message = u'Failed login. That account is not active.'
 
     if message:
         request.session.flash(message)
@@ -63,7 +60,7 @@ def login_post(request):
 
 def logout(request):
     request.session.delete()
-    next_url = request.params.get('next', model_url(request.root, request))
+    next_url = request.params.get('next', resource_url(request.root, request))
     return HTTPFound(location=next_url, headers=forget(request))
 
 def view_model(request):

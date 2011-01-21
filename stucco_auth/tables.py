@@ -63,6 +63,7 @@ class User(Base):
             secondary = users_groups,
             backref="users")
 
+    @property
     def is_anonymous(self):
         return False
 
@@ -88,6 +89,7 @@ class AnonymousUser(User):
     user_id = 0
     groups = []
 
+    @property
     def is_anonymous(self):
         return True
 

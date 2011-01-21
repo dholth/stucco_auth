@@ -1,4 +1,4 @@
-import sqlalchemy.orm.exc
+import sqlalchemy
 from stucco_auth.tables import User
 
 def lookup_groups(userid, request):
