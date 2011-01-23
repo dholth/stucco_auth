@@ -2,7 +2,6 @@
 Traversal models.
 """
 
-import warnings
 from zope.interface import implements
 from pyramid.security import Allow, Everyone
 
