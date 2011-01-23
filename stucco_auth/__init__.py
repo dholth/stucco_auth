@@ -31,7 +31,7 @@ def new_request_listener(event):
     event.request.db = event.request.environ[SESSION_KEY]
 
 
-def config(c):
+def includeme(c):
     """Add stucco_auth views to Pyramid configurator instance."""
     c.add_view(views.login, name='login', context=IAuthRoot,
         renderer='login.jinja2')
@@ -80,7 +80,7 @@ def main(global_config, **settings):
         session_factory = \
             pyramid_beaker.session_factory_from_settings(settings)
         config.set_session_factory(session_factory)
-        config.include('stucco_auth.config')
+        config.include('stucco_auth.includeme')
         config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
         # event handler will only work if stucco_auth.tm is being used
         config.add_subscriber(new_request_listener, NewRequest)
@@ -95,6 +95,7 @@ def main(global_config, **settings):
         # In case database work was done during init:
         session.commit()
     except:
+        raise
         session.rollback()
     finally:
         session.close()
