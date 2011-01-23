@@ -41,7 +41,7 @@ def includeme(c):
     c.add_static_view('static', 'stucco_auth:static')
 
 
-def main(global_config, **settings):
+def demo_app(global_config, **settings):
     """Return the example application for stucco_auth."""
     from stucco_auth.models import get_root
 

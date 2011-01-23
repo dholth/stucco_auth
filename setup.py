@@ -38,7 +38,7 @@ setup(name='stucco_auth',
       test_suite='nose.collector',
       entry_points="""
       [paste.app_factory]
-      main = stucco_auth:main
+      demo_app = stucco_auth:demo_app
       [paste.filter_app_factory]
       tm = stucco_auth.tm:make_tm
       """,
