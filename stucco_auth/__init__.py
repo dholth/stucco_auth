@@ -4,10 +4,12 @@ import sqlalchemy.orm
 
 import pyramid_jinja2
 
+from pyramid.interfaces import IAuthenticationPolicy
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.events import NewRequest
+from pyramid.exceptions import ConfigurationError
 
 from stucco_auth import security
 from stucco_auth import tables
@@ -29,8 +31,16 @@ def new_request_listener(event):
     """
     event.request.db = event.request.environ[SESSION_KEY]
 
-def config(c):
+def includeme(c):
+    """Starter stucco_auth configuration."""
+    config_views(c)
+
+def config_views(c):
     """Add stucco_auth views to Pyramid configurator instance."""
+    if c.registry.queryUtility(IAuthenticationPolicy) is None:
+        raise ConfigurationError(
+        "AuthenticationPolicy required for stucco_auth's login/logout views."
+        )
     c.add_view(views.login, name='login', context=IAuthRoot,
         renderer='login.jinja2')
     c.add_view(views.login_post, name='login', context=IAuthRoot,
@@ -39,7 +49,7 @@ def config(c):
     c.add_static_view('static', 'stucco_auth:static')
 
 def main(global_config, **settings):
-    """Return the example application for stucco_auth."""    
+    """Return the example application for stucco_auth."""
     from stucco_auth.models import get_root
     
     engine = sqlalchemy.engine_from_config(settings)
@@ -77,7 +87,7 @@ def main(global_config, **settings):
         session_factory = pyramid_beaker.session_factory_from_settings(settings)
         config.set_session_factory(session_factory)
         
-        config.include('stucco_auth.config')
+        config.include('stucco_auth.config_views')
     
         config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
     
@@ -96,6 +106,7 @@ def main(global_config, **settings):
         
     except:
         session.rollback()
+        raise
         
     finally:
         session.close()
