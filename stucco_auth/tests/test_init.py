@@ -1,11 +1,11 @@
 from nose.tools import raises
 import pyramid.exceptions
 
-def test_main():
+def test_demo_app():
     """Test demo WSGI app creation function."""
     import stucco_auth
     config = {'default_locale_name': 'en', 'sqlalchemy.url': 'sqlite:///:memory:', 'debug_authorization': 'false', 'jinja2.directories': 'stucco_auth:templates', 'debug_templates': 'true', 'reload_templates': 'true', 'debug_notfound': 'false'} 
-    assert stucco_auth.main({}, **config) is not None
+    assert stucco_auth.demo_app({}, **config) is not None
 
 def test_request_listener():
     """Assert new_request_listener assigns request.db from WSGI environment."""

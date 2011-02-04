@@ -1,5 +1,6 @@
 from zope.interface import Interface
 
+
 class IAuthRoot(Interface):
     """To hang stucco_auth views off an arbitrary class, write
 

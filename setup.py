@@ -18,7 +18,7 @@ requires = [
 setup(name='stucco_auth',
       version='0.1e-6',
       description='stucco_auth',
-      long_description=README + '\n\n' +  CHANGES,
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python",
@@ -36,12 +36,11 @@ setup(name='stucco_auth',
       install_requires=requires,
       tests_require=requires + ['nose'],
       test_suite='nose.collector',
-      entry_points = """\
+      entry_points="""
       [paste.app_factory]
-      main = stucco_auth:main
+      demo_app = stucco_auth:demo_app
       [paste.filter_app_factory]
       tm = stucco_auth.tm:make_tm
       """,
       paster_plugins=['pyramid'],
       )
-

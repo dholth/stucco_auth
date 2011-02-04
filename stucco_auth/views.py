@@ -8,30 +8,32 @@ from stucco_auth.security import authenticate
 import logging
 log = logging.getLogger(__name__)
 
+
 def login(request):
     """Login view for GET requests."""
     logged_in = authenticated_userid(request) is not None
 
     if logged_in:
-        return {'logged_in':True,
-                'form_enabled':False,
-                'status':u'Already logged in',
-                'status_type':u'info'}
+        return {'logged_in': True,
+                'form_enabled': False,
+                'status': u'Already logged in',
+                'status_type': u'info'}
 
     status = u''
-    status_type = u''    
+    status_type = u''
 
     return {
-        'form_enabled':True,
-        'status_type':status_type,
-        'status':status,
-        'logged_in':False,
-        'username':request.params.get('username', u''),
+        'form_enabled': True,
+        'status_type': status_type,
+        'status': status,
+        'logged_in': False,
+        'username': request.params.get('username', u''),
         }
-    
+
+
 def login_post(request):
     """Login view for POST requests."""
-    context = request.context    
+    context = request.context
     login_url = resource_url(context, request, 'login')
     next_url = request.params.get('next', request.referrer)
     if not next_url or next_url == login_url:
@@ -58,12 +60,13 @@ def login_post(request):
 
     return HTTPFound(location=next_url, headers=headers)
 
+
 def logout(request):
     request.session.delete()
     next_url = request.params.get('next', resource_url(request.root, request))
     return HTTPFound(location=next_url, headers=forget(request))
 
+
 def view_model(request):
     """Do-nothing view. Template will reference request.context"""
     return {}
-

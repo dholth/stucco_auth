@@ -1,9 +1,11 @@
 
 SESSION_KEY = 'sqlalchemy.session'
 
+
 def get_session(request):
     """Return SQLAlchemy session for this request."""
     return request.environ[SESSION_KEY]
+
 
 class TM(object):
     """Simple SQLAlchemy-only transaction manager."""
@@ -31,6 +33,7 @@ class TM(object):
             if self.removable:
                 self.session_factory.remove()
 
+
 def make_tm(app, global_conf):
     """Attempt to work as paste-configured middleware. Look for a :param
     sqlalchemy.url: key and create a Session based on that key.
@@ -41,4 +44,3 @@ def make_tm(app, global_conf):
     import sqlalchemy.orm
     Session = sqlalchemy.orm.sessionmaker(global_conf['sqlalchemy.url'])
     return TM(app, Session)
-
