@@ -11,21 +11,27 @@ def test_evolution():
     import stucco_auth.evolve
 
     engine = sqlalchemy.create_engine('sqlite:///:memory:')
-    Session = sqlalchemy.orm.sessionmaker(engine)
-    session = Session()
+    connection = engine.connect()
 
-    stucco_evolution.initialize(session)
-    stucco_evolution.create_or_upgrade_packages(session, 'stucco_auth')
+    trans = connection.begin()
+    try:
+        stucco_evolution.initialize(connection)
+        stucco_evolution.create_or_upgrade_packages(connection, 'stucco_auth')
 
-    versions = {}
-    for row in session.query(stucco_evolution.SchemaVersion):
-        versions[row.package] = row.version
+        session = sqlalchemy.orm.sessionmaker()(bind=connection)
 
-    assert 'stucco_evolution' in versions, versions
-    assert 'stucco_auth' in versions, versions
-    assert versions['stucco_auth'] == stucco_auth.evolve.VERSION
+        versions = {}
+        for row in session.query(stucco_evolution.SchemaVersion):
+            versions[row.package] = row.version
 
-    session.commit()
+        assert 'stucco_evolution' in versions, versions
+        assert 'stucco_auth' in versions, versions
+        assert versions['stucco_auth'] == stucco_auth.evolve.VERSION
 
-    # the automatically added admin user
-    assert session.query(stucco_auth.tables.User).count() > 0
+        session.commit()
+
+        # the automatically added admin user
+        assert session.query(stucco_auth.tables.User).count() > 0
+
+    finally:
+        connection.close()

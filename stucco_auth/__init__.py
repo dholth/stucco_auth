@@ -61,8 +61,8 @@ def demo_app(global_config, **settings):
     session = Session()
     try:
         import stucco_evolution
-        stucco_evolution.initialize(session)
-        stucco_evolution.create_or_upgrade_packages(session, 'stucco_auth')
+        stucco_evolution.initialize(session.connection())
+        stucco_evolution.create_or_upgrade_packages(session.connection(), 'stucco_auth')
 
         # Retrieve stored auth_tkt secret, or make and store a secure new one:
         tkt_secret = session.query(tables.Settings).get('auth_tkt_secret')

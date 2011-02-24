@@ -13,8 +13,8 @@ class TableTests(unittest.TestCase):
         session = self.Session()
         
         import stucco_evolution
-        stucco_evolution.initialize(session)
-        stucco_evolution.create_or_upgrade_packages(session, 'stucco_auth')
+        stucco_evolution.initialize(session.connection())
+        stucco_evolution.create_or_upgrade_packages(session.connection(), 'stucco_auth')
         session.commit()
 
     def test_user(self):
@@ -199,8 +199,9 @@ class ViewsTests(unittest.TestCase):
             sqlalchemy.create_engine('sqlite:///:memory:')
             )
         session = Session()
-        stucco_evolution.initialize(session)        
-        stucco_evolution.manager(session, 'stucco_auth').create()
+        connection = session.connection()
+        stucco_evolution.initialize(connection)        
+        stucco_evolution.manager(connection, 'stucco_auth').create()
         user = stucco_auth.security.authenticate(session, 'foo', 'bar')
         assert user is None, user
         
