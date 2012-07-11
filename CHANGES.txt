@@ -1,3 +1,8 @@
+0.4
+---
+- upgrade to a normal version numbering scheme
+- generalize 'persistent random secret' code
+
 0.3e-4
 ------
 - fix MANIFEST.in to include the .jinja2 templates

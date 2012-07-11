@@ -49,6 +49,19 @@ def config_views(c):
     c.add_view(views.logout, name='logout', context=IAuthRoot)
     c.add_static_view('static', 'stucco_auth:static')
 
+def persistent_random_secret(session, key):
+    """Retrieve or create random, persistent named secret."""
+    tkt_secret = session.query(tables.Settings).get(key)
+    if tkt_secret is None:
+        tkt_secret = tables.Settings(key=key,
+                value=os.urandom(16).encode('hex'))
+        log.info("Generated new secret '%s'", key)
+        session.add(tkt_secret)
+    return tkt_secret
+
+def auth_tkt_secret(session):
+    """Retrieve stored auth_tkt secret, or make and store a secure new one."""
+    return persistent_random_secret(session, 'auth_tkt_secret')
 
 def demo_app(global_config, **settings):
     """Return the example application for stucco_auth."""
@@ -62,15 +75,10 @@ def demo_app(global_config, **settings):
     try:
         import stucco_evolution
         stucco_evolution.initialize(session.connection())
-        stucco_evolution.create_or_upgrade_packages(session.connection(), 'stucco_auth')
+        stucco_evolution.create_or_upgrade_packages(session.connection(), 
+                                                    'stucco_auth')
 
-        # Retrieve stored auth_tkt secret, or make and store a secure new one:
-        tkt_secret = session.query(tables.Settings).get('auth_tkt_secret')
-        if tkt_secret is None:
-            tkt_secret = tables.Settings(key='auth_tkt_secret',
-                    value=os.urandom(20).encode('hex'))
-            log.info("New auth_tkt secret: %s", tkt_secret.value)
-            session.add(tkt_secret)
+        tkt_secret = auth_tkt_secret(session)
 
         authentication_policy = AuthTktAuthenticationPolicy(
             tkt_secret.value, callback=security.lookup_groups)
