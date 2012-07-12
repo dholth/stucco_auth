@@ -42,5 +42,5 @@ setup(name='stucco_auth',
       [paste.filter_app_factory]
       tm = stucco_auth.tm:make_tm
       """,
-      paster_plugins=['pyramid'],
+#      paster_plugins=['pyramid'],
       )
