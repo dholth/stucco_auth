@@ -16,7 +16,7 @@ requires = [
 ]
 
 setup(name='stucco_auth',
-      version='0.4',
+      version='0.4.1',
       description='stucco_auth',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[

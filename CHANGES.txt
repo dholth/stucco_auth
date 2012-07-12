@@ -1,3 +1,7 @@
+0.4.1
+-----
+- don't specify paster_plugins. need to re-evaluate template project.
+
 0.4
 ---
 - upgrade to a normal version numbering scheme
