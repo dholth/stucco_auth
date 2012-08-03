@@ -38,10 +38,6 @@ def includeme(c):
 
 def config_views(c):
     """Add stucco_auth views to Pyramid configurator instance."""
-    if c.registry.queryUtility(IAuthenticationPolicy) is None:
-        raise ConfigurationError(
-        "AuthenticationPolicy required for stucco_auth's login/logout views."
-        )
     c.add_view(views.login, name='login', context=IAuthRoot,
         renderer='login.jinja2')
     c.add_view(views.login_post, name='login', context=IAuthRoot,
