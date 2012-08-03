@@ -4,12 +4,6 @@
 {{ super() }}
 <link rel="stylesheet" href="{{ request.static_url('stucco_auth:static/css/uni-form.css') }}" />
 <link rel="stylesheet" href="{{ request.static_url('stucco_auth:static/css/default.uni-form.css') }}" />
-{% endblock %}
-
-{% block js %}
-{{ super() }}
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script src="{{ request.static_url('stucco_auth:static/js/uni-form.jquery.js') }}" type="text/javascript"></script>
 <style>
   .signup, .login {
     max-width: 44em;
@@ -21,4 +15,10 @@
     -moz-border-radius: 0.5em; border-radius: 0.5em;
   }
 </style>
+{% endblock %}
+
+{% block js %}
+{{ super() }}
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="{{ request.static_url('stucco_auth:static/js/uni-form.jquery.js') }}" type="text/javascript"></script>
 {% endblock %}
