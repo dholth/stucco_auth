@@ -43,7 +43,8 @@ def config_views(c):
     c.add_view(views.login_post, name='login', context=IAuthRoot,
         request_method='POST')
     c.add_view(views.logout, name='logout', context=IAuthRoot)
-    c.add_static_view('static', 'stucco_auth:static')
+    # caller places this where they want it
+    # c.add_static_view('static', 'stucco_auth:static')
 
 def persistent_random_secret(session, key):
     """Retrieve or create random, persistent named secret."""
@@ -94,6 +95,7 @@ def demo_app(global_config, **settings):
             pyramid_beaker.session_factory_from_settings(settings)
         config.set_session_factory(session_factory)
         config.include('stucco_auth.includeme')
+        config.add_static_view('static', 'stucco_auth:static')
         config.add_view(context=IAuthRoot, renderer='welcome.jinja2')
         # event handler will only work if stucco_auth.tm is being used
         config.add_subscriber(new_request_listener, NewRequest)
