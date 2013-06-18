@@ -86,6 +86,8 @@ class User(Base):
 
 
 class AnonymousUser(User):
+    __abstract__ = True
+
     username = u'anonymous'
     email = u""
     first_name = u'(not logged in)'
