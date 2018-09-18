@@ -18,9 +18,9 @@ class TableTests(unittest.TestCase):
         session.commit()
 
     def test_user(self):
-        user = stucco_auth.tables.User(username='alice',
-            first_name='Alice', last_name='Liddell',
-            email='alice@example.org')
+        user = stucco_auth.tables.User(username=u'alice',
+            first_name=u'Alice', last_name=u'Liddell',
+            email=u'alice@example.org')
         
         str(user) # User can str() when user_id is None?
 
@@ -66,7 +66,7 @@ class TableTests(unittest.TestCase):
     def test_anonymous(self):
         user = stucco_auth.tables.AnonymousUser()
         self.assertTrue(user.is_anonymous)
-        self.assertFalse(user.check_password('foo'))
+        self.assertFalse(user.check_password(u'foo'))
 
     def test_view_model(self):
         assert stucco_auth.views.view_model(None) == {}
@@ -202,6 +202,6 @@ class ViewsTests(unittest.TestCase):
         connection = session.connection()
         stucco_evolution.initialize(connection)        
         stucco_evolution.manager(connection, 'stucco_auth').create()
-        user = stucco_auth.security.authenticate(session, 'foo', 'bar')
+        user = stucco_auth.security.authenticate(session, u'foo', 'bar')
         assert user is None, user
         

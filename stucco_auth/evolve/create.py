@@ -12,10 +12,10 @@ def create(connection):
 
     if session.query(stucco_auth.tables.User).count() == 0:
         password = os.urandom(4).encode('hex')
-        admin = stucco_auth.tables.User(username='admin',
-                                        first_name='Administrator',
-                                        last_name='',
-                                        email='admin@example.org')
+        admin = stucco_auth.tables.User(username=u'admin',
+                                        first_name=u'Administrator',
+                                        last_name=u'',
+                                        email=u'admin@example.org')
         admin.set_password(password)
         session.add(admin)
 
