@@ -1,5 +1,4 @@
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
 from pyramid.security import remember, forget
 from pyramid.url import resource_url
 
@@ -11,7 +10,7 @@ log = logging.getLogger(__name__)
 
 def login(request):
     """Login view for GET requests."""
-    logged_in = authenticated_userid(request) is not None
+    logged_in = request.authenticated_userid is not None
 
     if logged_in:
         return {'logged_in': True,
