@@ -1,3 +1,7 @@
+0.6.0
+----
+- Generate random password in a Python 3 compatible way.
+
 0.5.0
 -----
 - update AnonymousUser class (has no table) to be __abstract__ for

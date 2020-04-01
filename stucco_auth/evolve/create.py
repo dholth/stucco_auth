@@ -3,6 +3,7 @@ def create(connection):
     import logging
     import stucco_auth.tables
     import sqlalchemy.orm
+    import codecs
 
     log = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ def create(connection):
     session = sqlalchemy.orm.sessionmaker()(bind=connection)
 
     if session.query(stucco_auth.tables.User).count() == 0:
-        password = os.urandom(4).encode('hex')
+        password = codecs.encode(os.urandom(8), 'hex')
         admin = stucco_auth.tables.User(username=u'admin',
                                         first_name=u'Administrator',
                                         last_name=u'',
